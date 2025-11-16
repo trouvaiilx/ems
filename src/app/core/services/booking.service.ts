@@ -1,4 +1,4 @@
-// src/app/core/services/booking.service.ts
+// src/app/core/services/booking.service.ts (FIXED)
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -12,21 +12,38 @@ export class BookingService {
   private bookingsSubject = new BehaviorSubject<Booking[]>([]);
   public bookings$ = this.bookingsSubject.asObservable();
 
-  createBooking(request: CreateBookingRequest, attendeeId: string, attendeeName: string, attendeeEmail: string): Observable<Booking> {
+  createBooking(
+    request: CreateBookingRequest, 
+    attendeeId: string, 
+    attendeeName: string, 
+    attendeeEmail: string,
+    eventName: string,
+    totalAmount: number,
+    discountApplied: number,
+    finalAmount: number
+  ): Observable<Booking> {
     // Generate QR code (in real app, this would be done server-side)
     const qrCode = `QR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     const newBooking: Booking = {
       id: Date.now().toString(),
       eventId: request.eventId,
-      eventName: 'Event Name', // Would be fetched from event service
+      eventName: eventName,
       attendeeId,
       attendeeName,
       attendeeEmail,
-      tickets: [], // Would be populated from ticket details
-      totalAmount: 0,
-      discountApplied: 0,
-      finalAmount: 0,
+      tickets: request.tickets.flatMap(t => 
+        t.seatNumbers.map(seat => ({
+          ticketTypeId: t.ticketTypeId,
+          category: (window as any).tempTicketCategory || 'GENERAL_ADMISSION',
+          section: (window as any).tempTicketSection || 'STALL',
+          seatNumber: seat,
+          price: (window as any).tempTicketPrice || 0
+        }))
+      ),
+      totalAmount: totalAmount,
+      discountApplied: discountApplied,
+      finalAmount: finalAmount,
       promoCode: request.promoCode,
       qrCode,
       status: BookingStatus.PENDING,
@@ -87,6 +104,13 @@ export class BookingService {
     return this.bookings$.pipe(
       delay(300),
       map(bookings => bookings.filter(b => b.attendeeId === attendeeId))
+    );
+  }
+
+  getBookingById(bookingId: string): Observable<Booking | undefined> {
+    return this.bookings$.pipe(
+      delay(300),
+      map(bookings => bookings.find(b => b.id === bookingId))
     );
   }
 

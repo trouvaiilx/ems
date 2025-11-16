@@ -1,4 +1,4 @@
-// src/app/features/attendee/payment/payment.component.ts
+// src/app/features/attendee/payment/payment.component.ts (FIXED)
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -416,24 +416,18 @@ export class PaymentComponent implements OnInit {
 
   ngOnInit(): void {
     const bookingId = this.route.snapshot.paramMap.get('bookingId');
-    if (bookingId) {
-      // Mock booking data - would fetch from service
-      this.booking = {
-        id: bookingId,
-        eventId: '1',
-        eventName: 'Sample Event',
-        attendeeId: '1',
-        attendeeName: 'John Doe',
-        attendeeEmail: 'john@example.com',
-        tickets: [],
-        totalAmount: 450,
-        discountApplied: 90,
-        finalAmount: 360,
-        qrCode: 'QR123',
-        status: 'PENDING' as any,
-        bookingDate: new Date(),
-        checkedIn: false
-      };
+    
+    // Try to get booking from localStorage first
+    const storedBooking = localStorage.getItem('current_booking');
+    if (storedBooking) {
+      this.booking = JSON.parse(storedBooking);
+    } else if (bookingId) {
+      // Fallback to service
+      this.bookingService.getBookingById(bookingId).subscribe({
+        next: (booking) => {
+          this.booking = booking;
+        }
+      });
     }
   }
 
@@ -457,6 +451,8 @@ export class PaymentComponent implements OnInit {
     setTimeout(() => {
       this.bookingService.confirmBooking(this.booking!.id).subscribe({
         next: () => {
+          // Clear stored booking
+          localStorage.removeItem('current_booking');
           this.router.navigate(['/my-tickets'], {
             queryParams: { success: 'true' }
           });
