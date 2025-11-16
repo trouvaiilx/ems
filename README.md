@@ -242,4 +242,3 @@ For questions or issues:
 ---
 
 **Note**: This is a prototype/educational project. For production use, additional security measures, testing, and backend implementation would be required.
-```
