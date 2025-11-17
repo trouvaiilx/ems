@@ -1,6 +1,5 @@
 ## Project Structure
 
-```
 src/
 ├── app/
 │   ├── core/
