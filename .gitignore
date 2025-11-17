@@ -38,8 +38,7 @@ testem.log
 /typings
 __screenshots__/
 
-temp.txt
-
 # System files
 .DS_Store
 Thumbs.db
+temp.txt
