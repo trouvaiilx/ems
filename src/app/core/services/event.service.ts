@@ -30,7 +30,7 @@ export class EventService {
       id: '2',
       name: 'Classical Music Evening',
       description: 'An enchanting evening of classical music performed by renowned orchestra.',
-      date: new Date('2025-11-25'),
+      date: new Date('2025-12-25'),
       time: '07:30 PM',
       posterUrl: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=800',
       organizerId: '2',

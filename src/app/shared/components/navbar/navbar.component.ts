@@ -12,238 +12,334 @@ import { User, UserRole } from '../../../core/models/user.model';
   imports: [CommonModule, RouterModule],
   template: `
     <nav class="navbar">
-      <div class="container">
+      <div class="navbar-container">
         <div class="navbar-brand">
-          <a routerLink="/" class="logo">
-            <span class="logo-icon">🎭</span>
-            <span class="logo-text">HELP Events</span>
+          <a routerLink="/" class="brand-link">
+            <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
+              />
+            </svg>
+            <span class="brand-text">HELP Events</span>
           </a>
         </div>
 
         <div class="navbar-menu">
-          <a routerLink="/home" routerLinkActive="active">Home</a>
-          <a routerLink="/events" routerLinkActive="active">Events</a>
-          
-          @if (currentUser) {
-            @if (currentUser.role === UserRole.ADMIN) {
-              <a routerLink="/admin/dashboard" routerLinkActive="active">Admin</a>
-            }
-            @if (currentUser.role === UserRole.ORGANIZER) {
-              <a routerLink="/organizer/dashboard" routerLinkActive="active">Dashboard</a>
-            }
-            @if (currentUser.role === UserRole.ATTENDEE) {
-              <a routerLink="/my-tickets" routerLinkActive="active">My Tickets</a>
-            }
-          }
+          <a routerLink="/home" routerLinkActive="active" class="nav-link">Home</a>
+          <a routerLink="/events" routerLinkActive="active" class="nav-link">Events</a>
+
+          @if (currentUser) { @if (currentUser.role === UserRole.ADMIN) {
+          <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-link">Admin</a>
+          } @if (currentUser.role === UserRole.ORGANIZER) {
+          <a routerLink="/organizer/dashboard" routerLinkActive="active" class="nav-link"
+            >Dashboard</a
+          >
+          } @if (currentUser.role === UserRole.ATTENDEE) {
+          <a routerLink="/my-tickets" routerLinkActive="active" class="nav-link">My Tickets</a>
+          } }
         </div>
 
         <div class="navbar-actions">
           @if (currentUser) {
-            <div class="user-menu">
-              <button class="user-button" (click)="toggleUserMenu()">
-                <span class="user-avatar">{{ getUserInitials() }}</span>
+          <div class="user-menu">
+            <button class="user-button" (click)="toggleUserMenu()">
+              <div class="user-avatar">
+                <span>{{ getUserInitials() }}</span>
+              </div>
+              <div class="user-info">
                 <span class="user-name">{{ currentUser.fullName }}</span>
-                <span class="chevron">▼</span>
+                <span class="user-role">{{ getUserRoleLabel(currentUser.role) }}</span>
+              </div>
+              <svg class="chevron-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
+            @if (showUserMenu) {
+            <div class="dropdown-menu">
+              <div class="dropdown-header">
+                <div class="dropdown-user-name">{{ currentUser.fullName }}</div>
+                <div class="dropdown-user-email">{{ currentUser.email }}</div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a routerLink="/change-password" class="dropdown-item" (click)="closeUserMenu()">
+                <svg class="dropdown-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fill-rule="evenodd"
+                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                Change Password
+              </a>
+              <button (click)="logout()" class="dropdown-item logout-item">
+                <svg class="dropdown-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fill-rule="evenodd"
+                    d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                Sign Out
               </button>
-              
-              @if (showUserMenu) {
-                <div class="dropdown-menu">
-                  <div class="user-info">
-                    <div class="user-name">{{ currentUser.fullName }}</div>
-                    <div class="user-email">{{ currentUser.email }}</div>
-                  </div>
-                  <div class="divider"></div>
-                  <a routerLink="/change-password" class="menu-item">Change Password</a>
-                  <button (click)="logout()" class="menu-item logout">Logout</button>
-                </div>
-              }
             </div>
+            }
+          </div>
           } @else {
-            <a routerLink="/login" class="btn btn-primary">Login</a>
+          <a routerLink="/login" class="btn btn-primary">Sign In</a>
           }
         </div>
       </div>
     </nav>
   `,
-  styles: [`
-    .navbar {
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
+  styles: [
+    `
+      .navbar {
+        background: var(--neutral-white);
+        border-bottom: 1px solid var(--primary-200);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+      }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+      .navbar-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 4rem;
+      }
 
-    .navbar-brand .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      text-decoration: none;
-      color: #333;
-      font-weight: 600;
-      font-size: 1.5rem;
-    }
+      .navbar-brand .brand-link {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        text-decoration: none;
+        color: var(--primary-900);
+        font-weight: 600;
+        font-size: 1.125rem;
+        transition: color var(--transition-fast);
+      }
 
-    .logo-icon {
-      font-size: 2rem;
-    }
+      .brand-icon {
+        width: 2rem;
+        height: 2rem;
+        color: var(--accent-600);
+      }
 
-    .navbar-menu {
-      display: flex;
-      gap: 2rem;
-    }
+      .brand-text {
+        font-family: var(--font-display);
+        letter-spacing: -0.025em;
+      }
 
-    .navbar-menu a {
-      text-decoration: none;
-      color: #666;
-      font-weight: 500;
-      transition: color 0.3s;
-    }
+      .navbar-menu {
+        display: flex;
+        gap: 0.25rem;
+        align-items: center;
+      }
 
-    .navbar-menu a:hover,
-    .navbar-menu a.active {
-      color: #6366f1;
-    }
+      .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--primary-700);
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        transition: all var(--transition-fast);
+        position: relative;
+      }
 
-    .navbar-actions {
-      position: relative;
-    }
+      .nav-link:hover {
+        color: var(--accent-600);
+        background: var(--primary-100);
+      }
 
-    .btn {
-      padding: 0.5rem 1.5rem;
-      border-radius: 0.5rem;
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.3s;
-    }
+      .nav-link.active {
+        color: var(--accent-600);
+        background: var(--accent-300);
+      }
 
-    .btn-primary {
-      background: #6366f1;
-      color: white;
-    }
+      .navbar-actions {
+        position: relative;
+      }
 
-    .btn-primary:hover {
-      background: #4f46e5;
-    }
+      .user-menu {
+        position: relative;
+      }
 
-    .user-menu {
-      position: relative;
-    }
+      .user-button {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem;
+        background: transparent;
+        border: 1px solid var(--primary-200);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
 
-    .user-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: white;
-      border: 1px solid #e5e7eb;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
+      .user-button:hover {
+        background: var(--primary-100);
+        border-color: var(--primary-300);
+      }
 
-    .user-button:hover {
-      border-color: #6366f1;
-    }
+      .user-avatar {
+        width: 2rem;
+        height: 2rem;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, var(--accent-600), var(--accent-800));
+        color: var(--neutral-white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+      }
 
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 0.875rem;
-    }
+      .user-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.125rem;
+      }
 
-    .user-name {
-      font-weight: 500;
-      color: #333;
-    }
+      .user-name {
+        font-weight: 500;
+        font-size: 0.875rem;
+        color: var(--primary-900);
+        line-height: 1.2;
+      }
 
-    .chevron {
-      font-size: 0.75rem;
-      color: #999;
-    }
+      .user-role {
+        font-size: 0.75rem;
+        color: var(--primary-600);
+        line-height: 1;
+      }
 
-    .dropdown-menu {
-      position: absolute;
-      top: calc(100% + 0.5rem);
-      right: 0;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.5rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      min-width: 200px;
-      overflow: hidden;
-    }
+      .chevron-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--primary-500);
+        transition: transform var(--transition-fast);
+      }
 
-    .user-info {
-      padding: 1rem;
-      background: #f9fafb;
-    }
+      .user-button:hover .chevron-icon {
+        transform: translateY(2px);
+      }
 
-    .user-info .user-name {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
+      .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        min-width: 16rem;
+        background: var(--neutral-white);
+        border: 1px solid var(--primary-200);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        animation: fadeIn var(--transition-fast);
+      }
 
-    .user-info .user-email {
-      font-size: 0.875rem;
-      color: #666;
-    }
+      .dropdown-header {
+        padding: 1rem;
+        background: var(--primary-100);
+      }
 
-    .divider {
-      height: 1px;
-      background: #e5e7eb;
-    }
+      .dropdown-user-name {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--primary-900);
+        margin-bottom: 0.25rem;
+      }
 
-    .menu-item {
-      display: block;
-      width: 100%;
-      padding: 0.75rem 1rem;
-      text-align: left;
-      text-decoration: none;
-      color: #333;
-      background: none;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
+      .dropdown-user-email {
+        font-size: 0.75rem;
+        color: var(--primary-600);
+      }
 
-    .menu-item:hover {
-      background: #f9fafb;
-    }
+      .dropdown-divider {
+        height: 1px;
+        background: var(--primary-200);
+      }
 
-    .menu-item.logout {
-      color: #ef4444;
-    }
-  `]
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        color: var(--primary-700);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all var(--transition-fast);
+        text-align: left;
+      }
+
+      .dropdown-item:hover {
+        background: var(--primary-100);
+        color: var(--primary-900);
+      }
+
+      .dropdown-icon {
+        width: 1.125rem;
+        height: 1.125rem;
+        color: var(--primary-500);
+      }
+
+      .logout-item {
+        color: var(--error-600);
+      }
+
+      .logout-item:hover {
+        background: var(--error-100);
+        color: var(--error-700);
+      }
+
+      .logout-item .dropdown-icon {
+        color: var(--error-600);
+      }
+
+      @media (max-width: 768px) {
+        .navbar-container {
+          padding: 0 1rem;
+        }
+
+        .navbar-menu {
+          display: none;
+        }
+
+        .user-info {
+          display: none;
+        }
+      }
+    `,
+  ],
 })
 export class NavbarComponent implements OnInit {
   currentUser: User | null = null;
   showUserMenu = false;
   UserRole = UserRole;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
     });
   }
@@ -251,11 +347,28 @@ export class NavbarComponent implements OnInit {
   getUserInitials(): string {
     if (!this.currentUser) return '';
     const names = this.currentUser.fullName.split(' ');
-    return names.map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return names
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  getUserRoleLabel(role: UserRole): string {
+    const labels: Record<UserRole, string> = {
+      [UserRole.ADMIN]: 'Administrator',
+      [UserRole.ORGANIZER]: 'Organizer',
+      [UserRole.ATTENDEE]: 'Attendee',
+    };
+    return labels[role];
   }
 
   toggleUserMenu(): void {
     this.showUserMenu = !this.showUserMenu;
+  }
+
+  closeUserMenu(): void {
+    this.showUserMenu = false;
   }
 
   logout(): void {

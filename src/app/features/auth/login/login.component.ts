@@ -14,230 +14,320 @@ import { LoginCredentials, UserRole } from '../../../core/models/user.model';
   template: `
     <div class="login-page">
       <div class="login-container">
-        <div class="login-header">
-          <h1>🎭 HELP Events</h1>
-          <p>Event Management System</p>
-        </div>
-
-        <form (ngSubmit)="onSubmit()" class="login-form">
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              [(ngModel)]="credentials.username"
-              name="username"
-              required
-              placeholder="Enter your username"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              [(ngModel)]="credentials.password"
-              name="password"
-              required
-              placeholder="Enter your password"
-            />
-          </div>
-
-          @if (errorMessage) {
-            <div class="error-message">
-              {{ errorMessage }}
+        <div class="login-card">
+          <div class="login-header">
+            <div class="brand-section">
+              <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
+                />
+              </svg>
+              <h1>HELP Events</h1>
             </div>
-          }
+            <p class="login-subtitle">Sign in to your account</p>
+          </div>
 
-          <button type="submit" class="btn btn-primary" [disabled]="loading">
-            @if (loading) {
-              <span class="spinner"></span>
+          <form (ngSubmit)="onSubmit()" class="login-form">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  id="username"
+                  [(ngModel)]="credentials.username"
+                  name="username"
+                  required
+                  placeholder="Enter your username"
+                  class="form-input"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fill-rule="evenodd"
+                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <input
+                  type="password"
+                  id="password"
+                  [(ngModel)]="credentials.password"
+                  name="password"
+                  required
+                  placeholder="Enter your password"
+                  class="form-input"
+                />
+              </div>
+            </div>
+
+            @if (errorMessage) {
+            <div class="alert alert-error">
+              <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span>{{ errorMessage }}</span>
+            </div>
             }
-            <span>{{ loading ? 'Logging in...' : 'Login' }}</span>
-          </button>
-        </form>
 
-        <div class="demo-credentials">
-          <h3>Demo Credentials:</h3>
-          <div class="credential-list">
-            <div class="credential-item">
-              <strong>Admin:</strong> admin / password
+            <button type="submit" class="btn btn-primary btn-block" [disabled]="loading">
+              @if (loading) {
+              <span class="spinner-sm"></span>
+              }
+              <span>{{ loading ? 'Signing in...' : 'Sign In' }}</span>
+            </button>
+          </form>
+
+          <div class="demo-section">
+            <div class="demo-header">
+              <svg class="demo-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span>Demo Credentials</span>
             </div>
-            <div class="credential-item">
-              <strong>Organizer:</strong> organizer1 / password
-            </div>
-            <div class="credential-item">
-              <strong>Attendee:</strong> attendee1 / password
+            <div class="demo-list">
+              <div class="demo-item">
+                <span class="demo-label">Administrator</span>
+                <code class="demo-code">admin / password</code>
+              </div>
+              <div class="demo-item">
+                <span class="demo-label">Organizer</span>
+                <code class="demo-code">organizer1 / password</code>
+              </div>
+              <div class="demo-item">
+                <span class="demo-label">Attendee</span>
+                <code class="demo-code">attendee1 / password</code>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   `,
-  styles: [`
-    .login-page {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 2rem;
-    }
+  styles: [
+    `
+      .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-100);
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+      }
 
-    .login-container {
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      padding: 3rem;
-      width: 100%;
-      max-width: 450px;
-    }
+      .login-page::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, var(--accent-300) 0%, transparent 70%);
+        opacity: 0.3;
+        pointer-events: none;
+      }
 
-    .login-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
+      .login-container {
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+        z-index: 1;
+      }
 
-    .login-header h1 {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-      color: #333;
-    }
+      .login-card {
+        background: var(--neutral-white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-xl);
+        padding: 2.5rem;
+        border: 1px solid var(--primary-200);
+      }
 
-    .login-header p {
-      color: #666;
-      font-size: 1.1rem;
-    }
+      .login-header {
+        margin-bottom: 2rem;
+        text-align: center;
+      }
 
-    .login-form {
-      margin-bottom: 2rem;
-    }
+      .brand-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
 
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
+      .brand-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        color: var(--accent-600);
+      }
 
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #333;
-    }
+      .brand-section h1 {
+        font-size: 1.875rem;
+        color: var(--primary-900);
+        margin: 0;
+      }
 
-    input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      transition: border-color 0.3s;
-    }
+      .login-subtitle {
+        color: var(--primary-600);
+        font-size: 0.875rem;
+        margin: 0;
+      }
 
-    input:focus {
-      outline: none;
-      border-color: #6366f1;
-    }
+      .login-form {
+        margin-bottom: 2rem;
+      }
 
-    .error-message {
-      background: #fee2e2;
-      color: #dc2626;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1rem;
-      font-size: 0.875rem;
-    }
+      .form-group {
+        margin-bottom: 1.25rem;
+      }
 
-    .btn {
-      width: 100%;
-      padding: 0.875rem;
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
+      .input-wrapper {
+        position: relative;
+      }
 
-    .btn-primary {
-      background: #6366f1;
-      color: white;
-    }
+      .input-icon {
+        position: absolute;
+        left: 0.875rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--primary-500);
+        pointer-events: none;
+      }
 
-    .btn-primary:hover:not(:disabled) {
-      background: #4f46e5;
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
-    }
+      .form-input {
+        width: 100%;
+        padding: 0.75rem 0.875rem 0.75rem 2.75rem;
+        font-size: 0.875rem;
+        border: 1px solid var(--primary-300);
+        border-radius: var(--radius-md);
+        transition: all var(--transition-fast);
+      }
 
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+      .form-input:focus {
+        border-color: var(--accent-500);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
 
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top: 2px solid white;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
+      .btn-block {
+        width: 100%;
+        justify-content: center;
+        padding: 0.875rem;
+        font-size: 0.9375rem;
+      }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+      .spinner-sm {
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+      }
 
-    .demo-credentials {
-      background: #f9fafb;
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      border: 1px solid #e5e7eb;
-    }
+      .demo-section {
+        padding: 1.25rem;
+        background: var(--primary-100);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--primary-200);
+      }
 
-    .demo-credentials h3 {
-      margin: 0 0 1rem 0;
-      font-size: 0.875rem;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+      .demo-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary-700);
+        font-weight: 500;
+        font-size: 0.875rem;
+      }
 
-    .credential-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+      .demo-icon {
+        width: 1.125rem;
+        height: 1.125rem;
+        color: var(--primary-600);
+      }
 
-    .credential-item {
-      font-size: 0.875rem;
-      color: #666;
-    }
+      .demo-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
 
-    .credential-item strong {
-      color: #333;
-      margin-right: 0.5rem;
-    }
-  `]
+      .demo-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.625rem 0.875rem;
+        background: var(--neutral-white);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--primary-200);
+      }
+
+      .demo-label {
+        font-size: 0.8125rem;
+        color: var(--primary-700);
+        font-weight: 500;
+      }
+
+      .demo-code {
+        font-family: 'Monaco', 'Consolas', monospace;
+        font-size: 0.75rem;
+        color: var(--primary-600);
+        background: var(--primary-100);
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-sm);
+      }
+
+      @media (max-width: 480px) {
+        .login-card {
+          padding: 2rem 1.5rem;
+        }
+
+        .demo-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+      }
+    `,
+  ],
 })
 export class LoginComponent {
   credentials: LoginCredentials = {
     username: '',
-    password: ''
+    password: '',
   };
-  
+
   loading = false;
   errorMessage = '';
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   onSubmit(): void {
     this.loading = true;
@@ -257,7 +347,7 @@ export class LoginComponent {
       },
       complete: () => {
         this.loading = false;
-      }
+      },
     });
   }
 

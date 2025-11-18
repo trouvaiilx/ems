@@ -13,34 +13,38 @@ import { CommonModule } from '@angular/common';
       <p>Loading...</p>
     </div>
   `,
-  styles: [`
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem;
-    }
+  styles: [
+    `
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+      }
 
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid #f3f4f6;
-      border-top: 4px solid #6366f1;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid var(--primary-300);
+        border-top-color: var(--accent-600);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-    p {
-      margin-top: 1rem;
-      color: #666;
-      font-weight: 500;
-    }
-  `]
+      p {
+        margin-top: 1.5rem;
+        color: var(--primary-600);
+        font-weight: 500;
+        font-size: 0.9375rem;
+      }
+    `,
+  ],
 })
 export class LoadingComponent {}
