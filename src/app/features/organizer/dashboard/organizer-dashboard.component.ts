@@ -502,6 +502,8 @@ import { Event } from '../../../core/models/event.model';
         box-shadow: var(--shadow-md);
         border: 1px solid var(--primary-200);
         transition: all var(--transition-base);
+        display: flex;
+        flex-direction: column;
       }
 
       .event-card:hover {
@@ -532,6 +534,9 @@ import { Event } from '../../../core/models/event.model';
 
       .event-content {
         padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
       }
 
       .event-header {
@@ -580,6 +585,8 @@ import { Event } from '../../../core/models/event.model';
         display: flex;
         gap: 0.5rem;
         flex-wrap: wrap;
+        margin-top: auto;
+        padding-top: 1rem;
       }
 
       .event-actions .btn {
@@ -856,6 +863,8 @@ export class OrganizerDashboardComponent implements OnInit {
   filteredEvents: Event[] = [];
   activeFilter: 'all' | 'upcoming' | 'draft' = 'all';
   loading = true;
+  totalBookings = 135;
+  totalRevenue = 20250;
 
   constructor(private eventService: EventService, private authService: AuthService) {}
 
@@ -897,11 +906,11 @@ export class OrganizerDashboardComponent implements OnInit {
   }
 
   getTotalBookings(): number {
-    return Math.floor(Math.random() * 500) + 100;
+    return this.totalBookings;
   }
 
   getTotalRevenue(): string {
-    return (Math.floor(Math.random() * 50000) + 10000).toLocaleString();
+    return this.totalRevenue.toLocaleString();
   }
 
   getUpcomingEvents(): number {

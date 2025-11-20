@@ -900,10 +900,6 @@ export class BookingComponent implements OnInit {
     const user = this.authService.getCurrentUser();
     if (!user) return;
 
-    (window as any).tempTicketCategory = this.selectedTickets[0]?.ticketType.category;
-    (window as any).tempTicketSection = this.selectedTickets[0]?.ticketType.section;
-    (window as any).tempTicketPrice = this.selectedTickets[0]?.ticketType.price;
-
     this.bookingService
       .createBooking(
         {
@@ -912,6 +908,9 @@ export class BookingComponent implements OnInit {
             ticketTypeId: s.ticketType.id,
             quantity: s.quantity,
             seatNumbers: s.seatNumbers,
+            category: s.ticketType.category,
+            section: s.ticketType.section,
+            price: s.ticketType.price,
           })),
           promoCode: this.promoSuccess ? this.promoCode : undefined,
         },

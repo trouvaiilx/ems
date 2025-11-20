@@ -42,6 +42,9 @@ export interface CreateBookingRequest {
     ticketTypeId: string;
     quantity: number;
     seatNumbers: string[];
+    category: TicketCategory;
+    section: SeatingSection;
+    price: number;
   }[];
   promoCode?: string;
 }

@@ -24,329 +24,341 @@ interface TicketTypeForm {
     <div class="ticket-setup-page">
       <div class="container">
         @if (event) {
-          <div class="page-header">
-            <h1>Ticket Setup</h1>
-            <p>Configure tickets for {{ event.name }}</p>
-          </div>
+        <div class="page-header">
+          <h1>Ticket Setup</h1>
+          <p>Configure tickets for {{ event.name }}</p>
+        </div>
 
-          <div class="setup-grid">
-            <div class="main-content">
-              <div class="card">
-                <h3>Add Ticket Types</h3>
-                
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>Category</label>
-                    <select [(ngModel)]="newTicket.category">
-                      <option [value]="TicketCategory.GENERAL_ADMISSION">General Admission</option>
-                      <option [value]="TicketCategory.VIP">VIP</option>
-                      <option [value]="TicketCategory.SENIOR_CITIZEN">Senior Citizen</option>
-                      <option [value]="TicketCategory.CHILD">Child</option>
-                    </select>
-                  </div>
+        <div class="setup-grid">
+          <div class="main-content">
+            <div class="card">
+              <h3>Add Ticket Types</h3>
 
-                  <div class="form-group">
-                    <label>Section</label>
-                    <select [(ngModel)]="newTicket.section">
-                      <option [value]="SeatingSection.BALCONY">Balcony</option>
-                      <option [value]="SeatingSection.MEZZANINE">Mezzanine</option>
-                      <option [value]="SeatingSection.STALL">Stall</option>
-                    </select>
-                  </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Category</label>
+                  <select [(ngModel)]="newTicket.category">
+                    <option [value]="TicketCategory.GENERAL_ADMISSION">General Admission</option>
+                    <option [value]="TicketCategory.VIP">VIP</option>
+                    <option [value]="TicketCategory.SENIOR_CITIZEN">Senior Citizen</option>
+                    <option [value]="TicketCategory.CHILD">Child</option>
+                  </select>
                 </div>
 
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>Price (RM)</label>
-                    <input type="number" [(ngModel)]="newTicket.price" min="0" step="10" />
-                  </div>
-
-                  <div class="form-group">
-                    <label>Max Tickets</label>
-                    <input type="number" [(ngModel)]="newTicket.maxTickets" min="1" max="500" />
-                  </div>
+                <div class="form-group">
+                  <label>Section</label>
+                  <select [(ngModel)]="newTicket.section">
+                    <option [value]="SeatingSection.BALCONY">Balcony</option>
+                    <option [value]="SeatingSection.MEZZANINE">Mezzanine</option>
+                    <option [value]="SeatingSection.STALL">Stall</option>
+                  </select>
                 </div>
-
-                <button (click)="addTicketType()" class="btn btn-primary">
-                  Add Ticket Type
-                </button>
               </div>
 
-              @if (ticketTypes.length > 0) {
-                <div class="card">
-                  <h3>Configured Tickets</h3>
-                  <div class="ticket-list">
-                    @for (ticket of ticketTypes; track $index) {
-                      <div class="ticket-item">
-                        <div class="ticket-info">
-                          <h4>{{ getCategoryName(ticket.category) }}</h4>
-                          <p>{{ ticket.section }} • RM {{ ticket.price }}</p>
-                          <p class="capacity">Max: {{ ticket.maxTickets }} tickets</p>
-                        </div>
-                        <button (click)="removeTicketType($index)" class="btn-remove">
-                          ✕
-                        </button>
-                      </div>
-                    }
-                  </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Price (RM)</label>
+                  <input type="number" [(ngModel)]="newTicket.price" min="0" step="10" />
                 </div>
 
-                <div class="card">
-                  <h3>Promotional Code (Optional)</h3>
-                  <div class="form-group">
-                    <label>Code</label>
-                    <input type="text" [(ngModel)]="promoCode" placeholder="PROMO2025" />
-                  </div>
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label>Discount (%)</label>
-                      <input type="number" [(ngModel)]="promoDiscount" min="0" max="100" />
-                    </div>
-                    <div class="form-group">
-                      <label>Expiry Date</label>
-                      <input type="date" [(ngModel)]="promoExpiry" />
-                    </div>
-                  </div>
+                <div class="form-group">
+                  <label>Max Tickets</label>
+                  <input type="number" [(ngModel)]="newTicket.maxTickets" min="1" max="500" />
                 </div>
-              }
+              </div>
+
+              <button (click)="addTicketType()" class="btn btn-primary">Add Ticket Type</button>
             </div>
 
-            <div class="sidebar">
-              <div class="summary-card">
-                <h3>Setup Summary</h3>
-                <div class="summary-stats">
-                  <div class="stat">
-                    <span class="stat-label">Ticket Types</span>
-                    <span class="stat-value">{{ ticketTypes.length }}</span>
+            @if (ticketTypes.length > 0) {
+            <div class="card">
+              <h3>Configured Tickets</h3>
+              <div class="ticket-list">
+                @for (ticket of ticketTypes; track $index) {
+                <div class="ticket-item">
+                  <div class="ticket-info">
+                    <h4>{{ getCategoryName(ticket.category) }}</h4>
+                    <p>{{ ticket.section }} • RM {{ ticket.price }}</p>
+                    <p class="capacity">Max: {{ ticket.maxTickets }} tickets</p>
                   </div>
-                  <div class="stat">
-                    <span class="stat-label">Total Capacity</span>
-                    <span class="stat-value">{{ getTotalCapacity() }}</span>
-                  </div>
-                  <div class="stat">
-                    <span class="stat-label">Price Range</span>
-                    <span class="stat-value">{{ getPriceRange() }}</span>
-                  </div>
+                  <button (click)="removeTicketType($index)" class="btn-remove">✕</button>
                 </div>
-
-                @if (ticketTypes.length > 0) {
-                  <button 
-                    (click)="saveConfiguration()" 
-                    class="btn btn-primary btn-block"
-                    [disabled]="saving"
-                  >
-                    {{ saving ? 'Saving...' : 'Save & Publish Event' }}
-                  </button>
                 }
               </div>
             </div>
+
+            <div class="card">
+              <h3>Promotional Code (Optional)</h3>
+              <div class="form-group">
+                <label>Code</label>
+                <input type="text" [(ngModel)]="promoCode" placeholder="PROMO2025" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Discount (%)</label>
+                  <input type="number" [(ngModel)]="promoDiscount" min="0" max="100" />
+                </div>
+                <div class="form-group">
+                  <label>Expiry Date</label>
+                  <input type="date" [(ngModel)]="promoExpiry" />
+                </div>
+              </div>
+            </div>
+            }
           </div>
+
+          <div class="sidebar">
+            <div class="summary-card">
+              <h3>Setup Summary</h3>
+              <div class="summary-stats">
+                <div class="stat">
+                  <span class="stat-label">Ticket Types</span>
+                  <span class="stat-value">{{ ticketTypes.length }}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Total Capacity</span>
+                  <span class="stat-value">{{ getTotalCapacity() }}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Price Range</span>
+                  <span class="stat-value">{{ getPriceRange() }}</span>
+                </div>
+              </div>
+
+              @if (ticketTypes.length > 0) {
+              <button
+                (click)="saveConfiguration()"
+                class="btn btn-primary btn-block"
+                [disabled]="saving"
+              >
+                {{ saving ? 'Saving...' : 'Save & Publish Event' }}
+              </button>
+              }
+            </div>
+          </div>
+        </div>
         }
       </div>
     </div>
   `,
-  styles: [`
-    .ticket-setup-page {
-      min-height: 100vh;
-      background: #f9fafb;
-      padding: 2rem;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .page-header {
-      margin-bottom: 2rem;
-    }
-
-    .page-header h1 {
-      font-size: 2.5rem;
-      margin: 0 0 0.5rem 0;
-      color: #333;
-    }
-
-    .page-header p {
-      color: #666;
-      margin: 0;
-    }
-
-    .setup-grid {
-      display: grid;
-      grid-template-columns: 1fr 350px;
-      gap: 2rem;
-    }
-
-    @media (max-width: 968px) {
-      .setup-grid {
-        grid-template-columns: 1fr;
+  styles: [
+    `
+      .ticket-setup-page {
+        min-height: 100vh;
+        background: #f9fafb;
+        padding: 2rem;
       }
-    }
 
-    .card {
-      background: white;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-bottom: 2rem;
-    }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-    .card h3 {
-      margin: 0 0 1.5rem 0;
-      color: #333;
-    }
+      .page-header {
+        margin-bottom: 2rem;
+      }
 
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
+      .page-header h1 {
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem 0;
+        color: var(--primary-900);
+      }
 
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
+      .page-header p {
+        color: var(--primary-600);
+        margin: 0;
+      }
 
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #333;
-      font-size: 0.875rem;
-    }
+      .setup-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 2rem;
+      }
 
-    input,
-    select {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-    }
+      @media (max-width: 968px) {
+        .setup-grid {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    input:focus,
-    select:focus {
-      outline: none;
-      border-color: #6366f1;
-    }
+      .card {
+        background: var(--neutral-white);
+        padding: 2rem;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2rem;
+        border: 1px solid var(--primary-200);
+      }
 
-    .ticket-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
+      .card h3 {
+        margin: 0 0 1.5rem 0;
+        color: var(--primary-900);
+      }
 
-    .ticket-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 0.5rem;
-    }
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
 
-    .ticket-info h4 {
-      margin: 0 0 0.5rem 0;
-      color: #333;
-    }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
 
-    .ticket-info p {
-      margin: 0 0 0.25rem 0;
-      color: #666;
-      font-size: 0.875rem;
-    }
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--primary-900);
+        font-size: 0.875rem;
+      }
 
-    .capacity {
-      color: #6366f1;
-      font-weight: 600;
-    }
+      input,
+      select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--primary-300);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        transition: all var(--transition-fast);
+      }
 
-    .btn-remove {
-      width: 36px;
-      height: 36px;
-      border: 2px solid #dc2626;
-      background: white;
-      color: #dc2626;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-size: 1.25rem;
-    }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--accent-500);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
 
-    .btn-remove:hover {
-      background: #dc2626;
-      color: white;
-    }
+      .ticket-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
 
-    .summary-card {
-      background: white;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 2rem;
-    }
+      .ticket-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border: 2px solid var(--primary-200);
+        border-radius: 0.5rem;
+      }
 
-    .summary-card h3 {
-      margin: 0 0 1.5rem 0;
-      color: #333;
-    }
+      .ticket-info h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--primary-900);
+      }
 
-    .summary-stats {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
+      .ticket-info p {
+        margin: 0 0 0.25rem 0;
+        color: var(--primary-600);
+        font-size: 0.875rem;
+      }
 
-    .stat {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      background: #f9fafb;
-      border-radius: 0.5rem;
-    }
+      .capacity {
+        color: var(--accent-600);
+        font-weight: 600;
+      }
 
-    .stat-label {
-      color: #666;
-      font-size: 0.875rem;
-    }
+      .btn-remove {
+        width: 36px;
+        height: 36px;
+        border: 2px solid var(--error-600);
+        background: var(--neutral-white);
+        color: var(--error-600);
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1.25rem;
+      }
 
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #6366f1;
-    }
+      .btn-remove:hover {
+        background: var(--error-600);
+        color: var(--neutral-white);
+      }
 
-    .btn {
-      padding: 0.875rem 1.5rem;
-      border: none;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
+      .summary-card {
+        background: var(--neutral-white);
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 2rem;
+      }
 
-    .btn-block {
-      width: 100%;
-    }
+      .summary-card h3 {
+        margin: 0 0 1.5rem 0;
+        color: var(--primary-900);
+      }
 
-    .btn-primary {
-      background: #6366f1;
-      color: white;
-    }
+      .summary-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
 
-    .btn-primary:hover:not(:disabled) {
-      background: #4f46e5;
-      transform: translateY(-2px);
-    }
+      .stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+      }
 
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  `]
+      .stat-label {
+        color: var(--primary-600);
+        font-size: 0.875rem;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent-600);
+      }
+
+      .btn {
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-base);
+        font-size: 0.9375rem;
+      }
+
+      .btn-primary {
+        background: var(--accent-600);
+        color: var(--neutral-white);
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-700);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn-secondary {
+        background: var(--primary-200);
+        color: var(--primary-900);
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary-300);
+      }
+
+      .btn-block {
+        width: 100%;
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    `,
+  ],
 })
 export class TicketSetupComponent implements OnInit {
   event: Event | undefined;
@@ -357,7 +369,7 @@ export class TicketSetupComponent implements OnInit {
     category: TicketCategory.GENERAL_ADMISSION,
     section: SeatingSection.STALL,
     price: 100,
-    maxTickets: 100
+    maxTickets: 100,
   };
 
   ticketTypes: TicketTypeForm[] = [];
@@ -379,7 +391,7 @@ export class TicketSetupComponent implements OnInit {
       this.eventService.getEventById(eventId).subscribe({
         next: (event) => {
           this.event = event;
-        }
+        },
       });
     }
   }
@@ -393,7 +405,7 @@ export class TicketSetupComponent implements OnInit {
   }
 
   getCategoryName(category: TicketCategory): string {
-    return category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return category.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   }
 
   getTotalCapacity(): number {
@@ -402,7 +414,7 @@ export class TicketSetupComponent implements OnInit {
 
   getPriceRange(): string {
     if (this.ticketTypes.length === 0) return 'N/A';
-    const prices = this.ticketTypes.map(t => t.price);
+    const prices = this.ticketTypes.map((t) => t.price);
     const min = Math.min(...prices);
     const max = Math.max(...prices);
     return min === max ? `RM ${min}` : `RM ${min} - ${max}`;
@@ -416,22 +428,24 @@ export class TicketSetupComponent implements OnInit {
     this.ticketService.createTicketTypes(this.event.id, this.ticketTypes).subscribe({
       next: () => {
         if (this.promoCode && this.promoDiscount > 0) {
-          this.ticketService.createPromoCode({
-            eventId: this.event!.id,
-            code: this.promoCode,
-            discountPercentage: this.promoDiscount,
-            applicableCategories: this.ticketTypes.map(t => t.category),
-            expiryDate: new Date(this.promoExpiry),
-            isActive: true
-          }).subscribe();
+          this.ticketService
+            .createPromoCode({
+              eventId: this.event!.id,
+              code: this.promoCode,
+              discountPercentage: this.promoDiscount,
+              applicableCategories: this.ticketTypes.map((t) => t.category),
+              expiryDate: new Date(this.promoExpiry),
+              isActive: true,
+            })
+            .subscribe();
         }
 
         this.eventService.publishEvent(this.event!.id).subscribe({
           next: () => {
             this.router.navigate(['/organizer/dashboard']);
-          }
+          },
         });
-      }
+      },
     });
   }
 }

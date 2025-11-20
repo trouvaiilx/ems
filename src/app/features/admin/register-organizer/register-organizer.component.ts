@@ -75,26 +75,22 @@ interface OrganizerRegistrationForm {
           </div>
 
           @if (errorMessage) {
-            <div class="error-message">{{ errorMessage }}</div>
-          }
-
-          @if (successMessage) {
-            <div class="success-message">
-              <h4>✓ Registration Successful!</h4>
-              <p>{{ successMessage }}</p>
-              <div class="credentials-info">
-                <strong>Login Credentials:</strong>
-                <div>Username: {{ generatedUsername }}</div>
-                <div>Password: {{ generatedPassword }}</div>
-                <small>(An email has been sent to the organizer)</small>
-              </div>
+          <div class="error-message">{{ errorMessage }}</div>
+          } @if (successMessage) {
+          <div class="success-message">
+            <h4>✓ Registration Successful!</h4>
+            <p>{{ successMessage }}</p>
+            <div class="credentials-info">
+              <strong>Login Credentials:</strong>
+              <div>Username: {{ generatedUsername }}</div>
+              <div>Password: {{ generatedPassword }}</div>
+              <small>(An email has been sent to the organizer)</small>
             </div>
+          </div>
           }
 
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary" (click)="onCancel()">
-              Cancel
-            </button>
+            <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
             <button type="submit" class="btn btn-primary" [disabled]="loading">
               {{ loading ? 'Registering...' : 'Register Organizer' }}
             </button>
@@ -103,158 +99,178 @@ interface OrganizerRegistrationForm {
       </div>
     </div>
   `,
-  styles: [`
-    .page-container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    .header {
-      margin-bottom: 2rem;
-    }
-
-    .header h1 {
-      margin: 0 0 0.5rem 0;
-      color: #333;
-    }
-
-    .header p {
-      color: #666;
-      margin: 0;
-    }
-
-    .card {
-      background: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      padding: 2rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    @media (max-width: 768px) {
-      .form-grid {
-        grid-template-columns: 1fr;
+  styles: [
+    `
+      .page-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        background: var(--primary-100);
       }
-    }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
+      .header {
+        margin-bottom: 2rem;
+      }
 
-    label {
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #333;
-    }
+      .header h1 {
+        margin: 0 0 0.5rem 0;
+        color: var(--primary-900);
+        font-size: 2.5rem;
+      }
 
-    input {
-      padding: 0.75rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      transition: border-color 0.3s;
-    }
+      .header p {
+        color: var(--primary-600);
+        margin: 0;
+        font-size: 1.125rem;
+      }
 
-    input:focus {
-      outline: none;
-      border-color: #6366f1;
-    }
+      .card {
+        background: var(--neutral-white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        border: 1px solid var(--primary-200);
+      }
 
-    .error-message {
-      background: #fee2e2;
-      color: #dc2626;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1rem;
-    }
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
 
-    .success-message {
-      background: #d1fae5;
-      border: 1px solid #a7f3d0;
-      color: #065f46;
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
+      @media (max-width: 768px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    .success-message h4 {
-      margin: 0 0 0.5rem 0;
-      color: #047857;
-    }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
 
-    .credentials-info {
-      margin-top: 1rem;
-      padding: 1rem;
-      background: white;
-      border-radius: 0.25rem;
-      font-family: monospace;
-    }
+      label {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--primary-900);
+        font-size: 0.875rem;
+      }
 
-    .credentials-info strong {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: #047857;
-    }
+      input {
+        padding: 0.75rem;
+        border: 2px solid var(--primary-300);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        transition: all var(--transition-fast);
+      }
 
-    .credentials-info small {
-      display: block;
-      margin-top: 0.5rem;
-      color: #059669;
-    }
+      input:focus {
+        outline: none;
+        border-color: var(--accent-500);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
 
-    .form-actions {
-      display: flex;
-      gap: 1rem;
-      justify-content: flex-end;
-    }
+      .error-message {
+        background: var(--error-100);
+        color: var(--error-700);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
+        border: 1px solid var(--error-600);
+        font-size: 0.875rem;
+      }
 
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
+      .success-message {
+        background: var(--success-100);
+        border: 1px solid var(--success-600);
+        color: var(--success-700);
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.5rem;
+      }
 
-    .btn-primary {
-      background: #6366f1;
-      color: white;
-    }
+      .success-message h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--success-700);
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
 
-    .btn-primary:hover:not(:disabled) {
-      background: #4f46e5;
-    }
+      .credentials-info {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: var(--neutral-white);
+        border-radius: var(--radius-md);
+        font-family: monospace;
+        font-size: 0.875rem;
+      }
 
-    .btn-secondary {
-      background: #e5e7eb;
-      color: #333;
-    }
+      .credentials-info strong {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--success-700);
+      }
 
-    .btn-secondary:hover {
-      background: #d1d5db;
-    }
+      .credentials-info small {
+        display: block;
+        margin-top: 0.5rem;
+        color: var(--success-600);
+        font-size: 0.8125rem;
+      }
 
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  `]
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-base);
+        font-size: 0.9375rem;
+      }
+
+      .btn-primary {
+        background: var(--accent-600);
+        color: var(--neutral-white);
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-700);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn-secondary {
+        background: var(--primary-200);
+        color: var(--primary-900);
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary-300);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    `,
+  ],
 })
 export class RegisterOrganizerComponent {
   form: OrganizerRegistrationForm = {
     fullName: '',
     email: '',
     phoneNumber: '',
-    organizationName: ''
+    organizationName: '',
   };
 
   loading = false;
@@ -281,9 +297,10 @@ export class RegisterOrganizerComponent {
       this.generatedUsername = this.generateUsername(this.form.fullName);
       this.generatedPassword = this.generatePassword();
 
-      this.successMessage = `Account created successfully for ${this.form.fullName}. ` +
+      this.successMessage =
+        `Account created successfully for ${this.form.fullName}. ` +
         `A welcome email with login credentials has been sent to ${this.form.email}.`;
-      
+
       this.loading = false;
 
       // Reset form after 5 seconds
@@ -325,7 +342,7 @@ export class RegisterOrganizerComponent {
       fullName: '',
       email: '',
       phoneNumber: '',
-      organizationName: ''
+      organizationName: '',
     };
     this.successMessage = '';
     this.generatedUsername = '';

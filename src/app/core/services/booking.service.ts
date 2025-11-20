@@ -6,25 +6,25 @@ import { delay, map } from 'rxjs/operators';
 import { Booking, BookingStatus, CreateBookingRequest } from '../models/booking.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BookingService {
   private bookingsSubject = new BehaviorSubject<Booking[]>([]);
   public bookings$ = this.bookingsSubject.asObservable();
 
   createBooking(
-    request: CreateBookingRequest, 
-    attendeeId: string, 
-    attendeeName: string, 
+    request: CreateBookingRequest,
+    attendeeId: string,
+    attendeeName: string,
     attendeeEmail: string,
     eventName: string,
     totalAmount: number,
     discountApplied: number,
     finalAmount: number
   ): Observable<Booking> {
-    // Generate QR code (in real app, this would be done server-side)
+    // Generate QR code
     const qrCode = `QR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const newBooking: Booking = {
       id: Date.now().toString(),
       eventId: request.eventId,
@@ -32,13 +32,13 @@ export class BookingService {
       attendeeId,
       attendeeName,
       attendeeEmail,
-      tickets: request.tickets.flatMap(t => 
-        t.seatNumbers.map(seat => ({
+      tickets: request.tickets.flatMap((t) =>
+        t.seatNumbers.map((seat) => ({
           ticketTypeId: t.ticketTypeId,
-          category: (window as any).tempTicketCategory || 'GENERAL_ADMISSION',
-          section: (window as any).tempTicketSection || 'STALL',
+          category: t.category,
+          section: t.section,
           seatNumber: seat,
-          price: (window as any).tempTicketPrice || 0
+          price: t.price,
         }))
       ),
       totalAmount: totalAmount,
@@ -48,12 +48,12 @@ export class BookingService {
       qrCode,
       status: BookingStatus.PENDING,
       bookingDate: new Date(),
-      checkedIn: false
+      checkedIn: false,
     };
 
     return of(newBooking).pipe(
       delay(500),
-      map(booking => {
+      map((booking) => {
         const current = this.bookingsSubject.value;
         this.bookingsSubject.next([...current, booking]);
         return booking;
@@ -64,9 +64,9 @@ export class BookingService {
   confirmBooking(bookingId: string): Observable<Booking> {
     return of(bookingId).pipe(
       delay(500),
-      map(id => {
+      map((id) => {
         const current = this.bookingsSubject.value;
-        const index = current.findIndex(b => b.id === id);
+        const index = current.findIndex((b) => b.id === id);
         if (index !== -1) {
           current[index].status = BookingStatus.CONFIRMED;
           this.bookingsSubject.next([...current]);
@@ -80,14 +80,16 @@ export class BookingService {
   cancelBooking(bookingId: string): Observable<boolean> {
     return of(bookingId).pipe(
       delay(500),
-      map(id => {
+      map((id) => {
         const current = this.bookingsSubject.value;
-        const index = current.findIndex(b => b.id === id);
+        const index = current.findIndex((b) => b.id === id);
         if (index !== -1) {
           const booking = current[index];
           const eventDate = new Date(booking.eventName); // In real app, get from event
-          const daysDifference = Math.ceil((eventDate.getTime() - new Date().getTime()) / (1000 * 3600 * 24));
-          
+          const daysDifference = Math.ceil(
+            (eventDate.getTime() - new Date().getTime()) / (1000 * 3600 * 24)
+          );
+
           if (daysDifference >= 7) {
             current[index].status = BookingStatus.CANCELLED;
             this.bookingsSubject.next([...current]);
@@ -103,23 +105,23 @@ export class BookingService {
   getBookingsByAttendee(attendeeId: string): Observable<Booking[]> {
     return this.bookings$.pipe(
       delay(300),
-      map(bookings => bookings.filter(b => b.attendeeId === attendeeId))
+      map((bookings) => bookings.filter((b) => b.attendeeId === attendeeId))
     );
   }
 
   getBookingById(bookingId: string): Observable<Booking | undefined> {
     return this.bookings$.pipe(
       delay(300),
-      map(bookings => bookings.find(b => b.id === bookingId))
+      map((bookings) => bookings.find((b) => b.id === bookingId))
     );
   }
 
   checkInBooking(qrCode: string): Observable<Booking> {
     return of(qrCode).pipe(
       delay(500),
-      map(code => {
+      map((code) => {
         const current = this.bookingsSubject.value;
-        const index = current.findIndex(b => b.qrCode === code);
+        const index = current.findIndex((b) => b.qrCode === code);
         if (index !== -1) {
           current[index].checkedIn = true;
           current[index].checkedInAt = new Date();

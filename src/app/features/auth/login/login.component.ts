@@ -250,6 +250,28 @@ import { LoginCredentials, UserRole } from '../../../core/models/user.model';
         animation: spin 0.6s linear infinite;
       }
 
+      .alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
+      }
+
+      .alert-error {
+        background: var(--error-100);
+        border: 1px solid var(--error-600);
+        color: var(--error-700);
+      }
+
+      .alert-icon {
+        width: 1rem;
+        height: 1rem;
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+      }
+
       .demo-section {
         padding: 1.25rem;
         background: var(--primary-100);

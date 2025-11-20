@@ -17,9 +17,9 @@ import { ChangePasswordRequest, UserRole } from '../../../core/models/user.model
         <div class="card">
           <h2>Change Password</h2>
           @if (isFirstLogin) {
-            <p class="info-message">
-              This is your first login. Please change your password to continue.
-            </p>
+          <p class="info-message">
+            This is your first login. Please change your password to continue.
+          </p>
           }
 
           <form (ngSubmit)="onSubmit()">
@@ -59,11 +59,9 @@ import { ChangePasswordRequest, UserRole } from '../../../core/models/user.model
             </div>
 
             @if (errorMessage) {
-              <div class="error-message">{{ errorMessage }}</div>
-            }
-
-            @if (successMessage) {
-              <div class="success-message">{{ successMessage }}</div>
+            <div class="error-message">{{ errorMessage }}</div>
+            } @if (successMessage) {
+            <div class="success-message">{{ successMessage }}</div>
             }
 
             <button type="submit" class="btn btn-primary" [disabled]="loading">
@@ -74,115 +72,133 @@ import { ChangePasswordRequest, UserRole } from '../../../core/models/user.model
       </div>
     </div>
   `,
-  styles: [`
-    .change-password-page {
-      min-height: 100vh;
-      background: #f9fafb;
-      padding: 2rem;
-    }
+  styles: [
+    `
+      .change-password-page {
+        min-height: 100vh;
+        background: var(--primary-100);
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-    }
+      .container {
+        max-width: 500px;
+        width: 100%;
+      }
 
-    .card {
-      background: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      padding: 2rem;
-    }
+      .card {
+        background: var(--neutral-white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        padding: 2.5rem;
+        border: 1px solid var(--primary-200);
+      }
 
-    h2 {
-      margin: 0 0 1rem 0;
-      color: #333;
-    }
+      h2 {
+        margin: 0 0 1rem 0;
+        color: var(--primary-900);
+        font-size: 2rem;
+      }
 
-    .info-message {
-      background: #dbeafe;
-      color: #1e40af;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
+      .info-message {
+        background: var(--accent-300);
+        color: var(--accent-900);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--accent-600);
+        font-size: 0.875rem;
+      }
 
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
 
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #333;
-    }
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--primary-900);
+        font-size: 0.875rem;
+      }
 
-    input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-    }
+      input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--primary-300);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        transition: all var(--transition-fast);
+      }
 
-    input:focus {
-      outline: none;
-      border-color: #6366f1;
-    }
+      input:focus {
+        outline: none;
+        border-color: var(--accent-500);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
 
-    small {
-      display: block;
-      margin-top: 0.25rem;
-      color: #666;
-      font-size: 0.875rem;
-    }
+      small {
+        display: block;
+        margin-top: 0.25rem;
+        color: var(--primary-600);
+        font-size: 0.875rem;
+      }
 
-    .error-message {
-      background: #fee2e2;
-      color: #dc2626;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1rem;
-    }
+      .error-message {
+        background: var(--error-100);
+        color: var(--error-700);
+        padding: 0.75rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
+        border: 1px solid var(--error-600);
+        font-size: 0.875rem;
+      }
 
-    .success-message {
-      background: #d1fae5;
-      color: #065f46;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1rem;
-    }
+      .success-message {
+        background: var(--success-100);
+        color: var(--success-700);
+        padding: 0.75rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
+        border: 1px solid var(--success-600);
+        font-size: 0.875rem;
+      }
 
-    .btn {
-      width: 100%;
-      padding: 0.875rem;
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
+      .btn {
+        width: 100%;
+        padding: 0.875rem;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-base);
+      }
 
-    .btn-primary {
-      background: #6366f1;
-      color: white;
-    }
+      .btn-primary {
+        background: var(--accent-600);
+        color: var(--neutral-white);
+      }
 
-    .btn-primary:hover:not(:disabled) {
-      background: #4f46e5;
-    }
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-700);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
 
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  `]
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    `,
+  ],
 })
 export class ChangePasswordComponent {
   request: ChangePasswordRequest = {
     currentPassword: '',
-    newPassword: ''
+    newPassword: '',
   };
   confirmPassword = '';
   loading = false;
@@ -190,10 +206,7 @@ export class ChangePasswordComponent {
   successMessage = '';
   isFirstLogin = false;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {
+  constructor(private authService: AuthService, private router: Router) {
     const user = this.authService.getCurrentUser();
     this.isFirstLogin = user?.isFirstLogin || false;
   }
@@ -227,7 +240,7 @@ export class ChangePasswordComponent {
       error: () => {
         this.errorMessage = 'Failed to change password';
         this.loading = false;
-      }
+      },
     });
   }
 

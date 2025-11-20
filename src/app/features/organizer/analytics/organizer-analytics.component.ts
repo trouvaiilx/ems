@@ -167,10 +167,14 @@ import {
               <div class="line-chart">
                 @for (report of salesReports; track report.period) {
                 <div class="chart-point">
-                  <div
-                    class="point-bar"
-                    [style.height.%]="(report.ticketsSold / getMaxSales()) * 100"
-                  ></div>
+                  <div class="bar-wrapper">
+                    <div
+                      class="point-bar"
+                      [style.height.%]="(report.ticketsSold / getMaxSales()) * 100"
+                    >
+                      <span class="bar-value">{{ report.ticketsSold }}</span>
+                    </div>
+                  </div>
                   <span class="point-label">{{ report.period }}</span>
                 </div>
                 }
@@ -445,6 +449,7 @@ import {
         justify-content: space-around;
         height: 100%;
         gap: 1rem;
+        padding-bottom: 2rem;
       }
 
       .chart-point {
@@ -452,15 +457,40 @@ import {
         display: flex;
         flex-direction: column;
         align-items: center;
-        height: 100%;
+      }
+
+      .bar-wrapper {
+        height: 180px;
+        display: flex;
+        align-items: flex-end;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .chart-point-wrapper {
+        height: 250px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        width: 100%;
       }
 
       .point-bar {
-        width: 100%;
-        max-width: 50px;
+        width: 50px;
+        min-height: 30px;
         background: linear-gradient(180deg, var(--accent-600) 0%, var(--accent-800) 100%);
         border-radius: var(--radius-md) var(--radius-md) 0 0;
         transition: all var(--transition-base);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 0.5rem;
+      }
+
+      .bar-value {
+        color: var(--neutral-white);
+        font-weight: 700;
+        font-size: 0.875rem;
       }
 
       .point-bar.occupancy {

@@ -527,14 +527,22 @@ import { TicketType } from '../../../core/models/ticket.model';
         color: var(--warning-900);
       }
 
-      .ticket-card,
-      .info-card {
+      .ticket-card {
         background: var(--neutral-white);
         border-radius: var(--radius-xl);
         box-shadow: var(--shadow-lg);
         border: 1px solid var(--primary-200);
         position: sticky;
         top: 2rem;
+        align-self: flex-start;
+        margin-bottom: 1.5rem;
+      }
+
+      .info-card {
+        background: var(--neutral-white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--primary-200);
         margin-bottom: 1.5rem;
       }
 

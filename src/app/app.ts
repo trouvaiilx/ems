@@ -27,65 +27,67 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
       </footer>
     </div>
   `,
-  styles: [`
-    .app-container {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .main-content {
-      flex: 1;
-    }
-
-    .app-footer {
-      background: #1f2937;
-      color: white;
-      padding: 2rem;
-      margin-top: auto;
-    }
-
-    .footer-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .footer-content p {
-      margin: 0;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 2rem;
-    }
-
-    .footer-links a {
-      color: white;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    .footer-links a:hover {
-      color: #6366f1;
-    }
-
-    @media (max-width: 768px) {
-      .footer-content {
+  styles: [
+    `
+      .app-container {
+        min-height: 100vh;
+        display: flex;
         flex-direction: column;
-        text-align: center;
+      }
+
+      .main-content {
+        flex: 1;
+      }
+
+      .app-footer {
+        background: #1f2937;
+        color: var(--neutral-white);
+        padding: 2rem;
+        margin-top: auto;
+      }
+
+      .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .footer-content p {
+        margin: 0;
       }
 
       .footer-links {
-        flex-direction: column;
-        gap: 0.5rem;
+        display: flex;
+        gap: 2rem;
       }
-    }
-  `]
+
+      .footer-links a {
+        color: var(--neutral-white);
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .footer-links a:hover {
+        color: var(--accent-600);
+      }
+
+      @media (max-width: 768px) {
+        .footer-content {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .footer-links {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+      }
+    `,
+  ],
 })
 export class App implements OnInit {
   ngOnInit(): void {
