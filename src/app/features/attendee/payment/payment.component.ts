@@ -1,4 +1,4 @@
-// src/app/features/attendee/payment/payment.component.ts - Modern Professional
+// src/app/features/attendee/payment/payment.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -32,7 +32,7 @@ import { Booking } from '../../../core/models/booking.model';
 
         <div class="payment-grid">
           <div class="main-content">
-            <div class="card">
+            <div class="payment-card">
               <div class="card-header">
                 <h2>Payment Method</h2>
               </div>
@@ -107,7 +107,7 @@ import { Booking } from '../../../core/models/booking.model';
             </div>
 
             @if (paymentMethod === 'card') {
-            <div class="card">
+            <div class="payment-card">
               <div class="card-header">
                 <h3>Card Details</h3>
               </div>
@@ -262,7 +262,7 @@ import { Booking } from '../../../core/models/booking.model';
 
       .payment-header {
         max-width: 1200px;
-        margin: 0 auto 2rem;
+        margin: 0 auto 2.5rem;
         text-align: center;
       }
 
@@ -302,6 +302,31 @@ import { Booking } from '../../../core/models/booking.model';
         gap: 2rem;
         max-width: 1200px;
         margin: 0 auto;
+      }
+
+      .payment-card {
+        background: var(--neutral-white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--primary-200);
+        overflow: hidden;
+        margin-bottom: 2rem;
+      }
+
+      .card-header {
+        padding: 1.75rem;
+        border-bottom: 1px solid var(--primary-200);
+      }
+
+      .card-header h2,
+      .card-header h3 {
+        margin: 0;
+        color: var(--primary-900);
+        font-size: 1.25rem;
+      }
+
+      .card-content {
+        padding: 2rem;
       }
 
       .payment-methods {
@@ -375,6 +400,33 @@ import { Booking } from '../../../core/models/booking.model';
         margin: 0;
         color: var(--primary-600);
         font-size: 0.875rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--primary-900);
+        font-size: 0.875rem;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--primary-300);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        transition: all var(--transition-fast);
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: var(--accent-500);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
       }
 
       .form-row {
@@ -464,10 +516,38 @@ import { Booking } from '../../../core/models/booking.model';
         color: var(--primary-900);
       }
 
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-base);
+        font-size: 0.9375rem;
+      }
+
       .btn-block {
         width: 100%;
-        justify-content: center;
-        font-size: 1rem;
+      }
+
+      .btn-primary {
+        background: var(--accent-600);
+        color: var(--neutral-white);
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-700);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
 
       .spinner-sm {
@@ -477,6 +557,33 @@ import { Booking } from '../../../core/models/booking.model';
         border-top-color: white;
         border-radius: 50%;
         animation: spin 0.6s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .alert {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-top: 1rem;
+      }
+
+      .alert-error {
+        background: var(--error-100);
+        border: 1px solid var(--error-600);
+        color: var(--error-700);
+      }
+
+      .alert-icon {
+        width: 1.125rem;
+        height: 1.125rem;
+        flex-shrink: 0;
       }
 
       .security-info {

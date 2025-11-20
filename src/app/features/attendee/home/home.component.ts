@@ -38,7 +38,7 @@ import { Event } from '../../../core/models/event.model';
             <div class="visual-card">
               <div class="visual-card-header">
                 <span class="visual-badge">Live</span>
-                <span class="visual-date">Nov 25</span>
+                <span class="visual-date">Dec 15</span>
               </div>
               <div class="visual-card-content">
                 <h4>Tech Conference 2025</h4>

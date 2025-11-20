@@ -246,6 +246,43 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
         margin: 0;
       }
 
+      /* FIXED: Success Alert Icon Size */
+      .alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.25rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        background: var(--success-100);
+        border: 1px solid var(--success-600);
+      }
+
+      .alert-success {
+        background: var(--success-100);
+        border-color: var(--success-600);
+      }
+
+      .alert-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--success-600);
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+      }
+
+      .alert h3 {
+        margin: 0 0 0.25rem 0;
+        color: var(--success-700);
+        font-size: 1rem;
+      }
+
+      .alert p {
+        margin: 0;
+        color: var(--success-700);
+        font-size: 0.875rem;
+      }
+
       .filter-tabs {
         display: flex;
         gap: 0.75rem;
@@ -281,7 +318,7 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
       .tab-btn:hover {
         border-color: var(--accent-500);
         color: var(--accent-600);
-        background: var(--accent-300);
+        background: var(--primary-100);
       }
 
       .tab-btn.active {
@@ -366,6 +403,16 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
         height: 1rem;
       }
 
+      .badge {
+        display: inline-block;
+        padding: 0.375rem 0.875rem;
+        border-radius: var(--radius-md);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+      }
+
       .badge-confirmed {
         background: var(--neutral-white);
         color: var(--success-700);
@@ -374,6 +421,11 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
       .badge-cancelled {
         background: var(--neutral-white);
         color: var(--error-700);
+      }
+
+      .badge-pending {
+        background: var(--neutral-white);
+        color: var(--warning-700);
       }
 
       .ticket-details {
@@ -466,6 +518,69 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
         font-size: 0.875rem;
       }
 
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-base);
+        font-size: 0.875rem;
+        text-decoration: none;
+      }
+
+      .btn svg {
+        width: 1rem;
+        height: 1rem;
+      }
+
+      .btn-secondary {
+        background: var(--primary-200);
+        color: var(--primary-900);
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary-300);
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 1px solid var(--primary-300);
+        color: var(--primary-700);
+      }
+
+      .btn-outline:hover {
+        background: var(--primary-100);
+        border-color: var(--accent-500);
+        color: var(--accent-600);
+      }
+
+      .btn-danger {
+        background: var(--error-100);
+        color: var(--error-700);
+        border: 1px solid var(--error-600);
+      }
+
+      .btn-danger:hover {
+        background: var(--error-600);
+        color: var(--neutral-white);
+      }
+
+      .btn-primary {
+        background: var(--accent-600);
+        color: var(--neutral-white);
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-700);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
       .checked-in-badge {
         padding: 1.25rem 1.75rem;
         background: var(--success-100);
@@ -543,15 +658,40 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
         font-size: 0.75rem;
       }
 
-      .btn-danger {
-        background: var(--error-100);
-        color: var(--error-700);
-        border: 1px solid var(--error-600);
+      /* FIXED: Empty State Spacing */
+      .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
       }
 
-      .btn-danger:hover {
-        background: var(--error-600);
-        color: var(--neutral-white);
+      .empty-state-icon {
+        width: 5rem;
+        height: 5rem;
+        margin: 0 auto 1.5rem;
+        background: var(--primary-200);
+        border-radius: var(--radius-xl);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .empty-state-icon svg {
+        width: 3rem;
+        height: 3rem;
+        color: var(--primary-600);
+        stroke-width: 1.5;
+      }
+
+      .empty-state h3 {
+        color: var(--primary-900);
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+      }
+
+      .empty-state p {
+        color: var(--primary-600);
+        margin: 0 0 2rem 0;
+        font-size: 1.0625rem;
       }
 
       @media (max-width: 768px) {
@@ -561,6 +701,14 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
 
         .filter-tabs {
           flex-direction: column;
+        }
+
+        .ticket-actions {
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
         }
       }
     `,
@@ -650,6 +798,6 @@ export class MyTicketsComponent implements OnInit {
   }
 
   downloadTicket(booking: Booking): void {
-    alert('Ticket download feature - PDF would be generated here');
+    alert('Ticket download feature - QR Code would be generated here');
   }
 }
