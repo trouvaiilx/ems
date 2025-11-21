@@ -1,4 +1,4 @@
-// src/app/app.ts (Complete Application Component)
+// src/app/app.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';

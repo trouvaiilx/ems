@@ -527,15 +527,23 @@ import { TicketType } from '../../../core/models/ticket.model';
         color: var(--warning-900);
       }
 
+      .sidebar {
+        position: sticky;
+        top: 2rem;
+        align-self: flex-start;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        max-height: calc(100vh - 4rem);
+        overflow-y: auto;
+      }
+
       .ticket-card {
         background: var(--neutral-white);
         border-radius: var(--radius-xl);
         box-shadow: var(--shadow-lg);
         border: 1px solid var(--primary-200);
-        position: sticky;
-        top: 2rem;
-        align-self: flex-start;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0;
       }
 
       .info-card {
@@ -544,6 +552,23 @@ import { TicketType } from '../../../core/models/ticket.model';
         box-shadow: var(--shadow-lg);
         border: 1px solid var(--primary-200);
         margin-bottom: 1.5rem;
+      }
+
+      .sidebar::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb {
+        background: var(--primary-400);
+        border-radius: var(--radius-md);
+      }
+
+      .sidebar::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-500);
       }
 
       .ticket-list {
@@ -692,6 +717,14 @@ import { TicketType } from '../../../core/models/ticket.model';
       .error-container p {
         color: var(--primary-600);
         margin-bottom: 2rem;
+      }
+
+      @media (max-width: 968px) {
+        .sidebar {
+          position: static;
+          max-height: none;
+          overflow-y: visible;
+        }
       }
 
       @media (max-width: 968px) {

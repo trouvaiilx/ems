@@ -188,7 +188,11 @@ import {
               <div class="line-chart">
                 @for (report of occupancyReports; track report.period) {
                 <div class="chart-point">
-                  <div class="point-bar occupancy" [style.height.%]="report.occupancyRate"></div>
+                  <div class="bar-wrapper">
+                    <div class="point-bar occupancy" [style.height.%]="report.occupancyRate">
+                      <span class="bar-value">{{ report.occupancyRate }}%</span>
+                    </div>
+                  </div>
                   <span class="point-label">{{ report.period }}</span>
                 </div>
                 }

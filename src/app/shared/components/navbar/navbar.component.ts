@@ -45,7 +45,7 @@ import { User, UserRole } from '../../../core/models/user.model';
         <div class="navbar-actions">
           @if (currentUser) {
           <div class="user-menu">
-            <button class="user-button" (click)="toggleUserMenu()">
+            <button class="user-button" (click)="toggleUserMenu(); $event.stopPropagation()">
               <div class="user-avatar">
                 <span>{{ getUserInitials() }}</span>
               </div>
@@ -342,6 +342,21 @@ export class NavbarComponent implements OnInit {
     this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
     });
+
+    document.addEventListener('click', this.onDocumentClick.bind(this));
+  }
+
+  ngOnDestroy(): void {
+    document.removeEventListener('click', this.onDocumentClick.bind(this));
+  }
+
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const userMenu = target.closest('.user-menu');
+
+    if (!userMenu && this.showUserMenu) {
+      this.showUserMenu = false;
+    }
   }
 
   getUserInitials(): string {

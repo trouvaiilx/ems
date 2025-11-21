@@ -376,7 +376,7 @@ import { AnalyticsService, AuditoriumUsageReport } from '../../../core/services/
 
       .bar-wrapper {
         width: 100%;
-        height: 250px;
+        height: 200px;
         display: flex;
         align-items: flex-end;
         justify-content: center;
