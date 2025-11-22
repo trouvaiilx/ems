@@ -18,6 +18,7 @@ export class BookingService {
     attendeeName: string,
     attendeeEmail: string,
     eventName: string,
+    eventDate: Date,
     totalAmount: number,
     discountApplied: number,
     finalAmount: number
@@ -29,6 +30,7 @@ export class BookingService {
       id: Date.now().toString(),
       eventId: request.eventId,
       eventName: eventName,
+      eventDate: eventDate,
       attendeeId,
       attendeeName,
       attendeeEmail,
@@ -78,21 +80,26 @@ export class BookingService {
   }
 
   cancelBooking(bookingId: string): Observable<boolean> {
-    return of(bookingId).pipe(
+    return this.bookings$.pipe(
       delay(500),
-      map((id) => {
-        const current = this.bookingsSubject.value;
-        const index = current.findIndex((b) => b.id === id);
+      map((bookings) => {
+        const index = bookings.findIndex((b) => b.id === bookingId);
         if (index !== -1) {
-          const booking = current[index];
-          const eventDate = new Date(booking.eventName); // In real app, get from event
+          const booking = bookings[index];
+
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          const eventDate = new Date(booking.eventDate);
+          eventDate.setHours(0, 0, 0, 0);
+
           const daysDifference = Math.ceil(
-            (eventDate.getTime() - new Date().getTime()) / (1000 * 3600 * 24)
+            (eventDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
           );
 
           if (daysDifference >= 7) {
-            current[index].status = BookingStatus.CANCELLED;
-            this.bookingsSubject.next([...current]);
+            bookings[index].status = BookingStatus.CANCELLED;
+            this.bookingsSubject.next([...bookings]);
             return true;
           }
           throw new Error('Cannot cancel booking less than 7 days before event');

@@ -199,9 +199,28 @@ import { TicketType } from '../../../core/models/ticket.model';
                         }
                       </p>
                     </div>
-                    <div class="ticket-price">
-                      <span class="currency">RM</span>
-                      <span class="amount">{{ ticket.price }}</span>
+                    <div class="ticket-price-actions">
+                      <div class="ticket-price">
+                        <span class="currency">RM</span>
+                        <span class="amount">{{ ticket.price }}</span>
+                      </div>
+                      @if (ticket.availableTickets === 0 && isLoggedIn) {
+                      <a
+                        [routerLink]="['/waitlist', event.id]"
+                        [queryParams]="{ category: ticket.category }"
+                        class="btn-waitlist"
+                      >
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                          <path
+                            fill-rule="evenodd"
+                            d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                        Join Waitlist
+                      </a>
+                      }
                     </div>
                   </div>
                   }
@@ -213,14 +232,14 @@ import { TicketType } from '../../../core/models/ticket.model';
                   class="btn btn-primary btn-block"
                   [disabled]="!hasAvailableTickets()"
                 >
-                  {{ hasAvailableTickets() ? 'Book Tickets' : 'Sold Out' }}
+                  {{ hasAvailableTickets() ? 'Book Tickets' : 'All Tickets Sold Out' }}
                 </button>
                 } @else {
                 <a routerLink="/login" class="btn btn-primary btn-block">Sign In to Book</a>
                 } @if (!hasAvailableTickets() && isLoggedIn) {
-                <button (click)="joinWaitlist()" class="btn btn-secondary btn-block">
+                <a [routerLink]="['/waitlist', event.id]" class="btn btn-secondary btn-block">
                   Join Waitlist
-                </button>
+                </a>
                 } } @else {
                 <p class="empty-text">Tickets not available yet</p>
                 }
@@ -615,6 +634,13 @@ import { TicketType } from '../../../core/models/ticket.model';
         text-align: right;
       }
 
+      .ticket-price-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.75rem;
+      }
+
       .currency {
         font-size: 0.875rem;
         color: var(--primary-600);
@@ -631,6 +657,32 @@ import { TicketType } from '../../../core/models/ticket.model';
         width: 100%;
         justify-content: center;
         margin-bottom: 0.75rem;
+      }
+
+      .btn-waitlist {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.5rem 1rem;
+        background: var(--warning-100);
+        color: var(--warning-700);
+        border: 1px solid var(--warning-600);
+        border-radius: var(--radius-md);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all var(--transition-fast);
+      }
+
+      .btn-waitlist:hover {
+        background: var(--warning-600);
+        color: var(--neutral-white);
+        transform: translateY(-1px);
+      }
+
+      .btn-waitlist svg {
+        width: 0.875rem;
+        height: 0.875rem;
       }
 
       .info-list {
@@ -803,14 +855,6 @@ export class EventDetailComponent implements OnInit {
   bookTickets(): void {
     if (this.event) {
       this.router.navigate(['/booking', this.event.id]);
-    }
-  }
-
-  joinWaitlist(): void {
-    if (this.event) {
-      this.router.navigate(['/events', this.event.id], {
-        queryParams: { action: 'waitlist' },
-      });
     }
   }
 }

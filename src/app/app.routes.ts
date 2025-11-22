@@ -149,6 +149,12 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'waitlist/:eventId',
+    loadComponent: () =>
+      import('./features/attendee/waitlist/waitlist.component').then((m) => m.WaitlistComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./shared/components/not-found/not-found.component').then((m) => m.NotFoundComponent),

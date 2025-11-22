@@ -13,6 +13,7 @@ export interface Booking {
   id: string;
   eventId: string;
   eventName: string;
+  eventDate: Date;
   attendeeId: string;
   attendeeName: string;
   attendeeEmail: string;

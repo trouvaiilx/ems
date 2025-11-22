@@ -1,6 +1,6 @@
 // src/app/features/attendee/my-tickets/my-tickets.component.ts
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
@@ -26,6 +26,22 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
           <div>
             <h3>Payment Successful!</h3>
             <p>Your tickets have been confirmed and sent to your email.</p>
+          </div>
+        </div>
+        } 
+        
+        @if (cancelSuccessMessage) {
+        <div class="alert alert-success">
+          <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <div>
+            <h3>Booking Cancelled Successfully!</h3>
+            <p>Your booking has been cancelled and refund will be processed.</p>
           </div>
         </div>
         }
@@ -714,12 +730,14 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
     `,
   ],
 })
-export class MyTicketsComponent implements OnInit {
+export class MyTicketsComponent implements OnInit, OnDestroy {
   bookings: Booking[] = [];
   filteredBookings: Booking[] = [];
   activeTab: 'upcoming' | 'past' | 'cancelled' = 'upcoming';
   loading = true;
   showSuccessMessage = false;
+  cancelSuccessMessage = false;
+  private cancelTimeout: any;
 
   constructor(
     private bookingService: BookingService,
@@ -738,6 +756,12 @@ export class MyTicketsComponent implements OnInit {
     const user = this.authService.getCurrentUser();
     if (user) {
       this.loadBookings(user.id);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.cancelTimeout) {
+      clearTimeout(this.cancelTimeout);
     }
   }
 
@@ -779,22 +803,44 @@ export class MyTicketsComponent implements OnInit {
   }
 
   canCancel(booking: Booking): boolean {
-    return true;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const eventDate = new Date(booking.eventDate);
+    eventDate.setHours(0, 0, 0, 0);
+
+    const daysDifference = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+
+    return daysDifference >= 7;
   }
 
   cancelBooking(booking: Booking): void {
-    if (confirm('Are you sure you want to cancel this booking?')) {
-      this.bookingService.cancelBooking(booking.id).subscribe({
-        next: () => {
-          booking.status = BookingStatus.CANCELLED;
-          this.filterBookings();
-          alert('Booking cancelled successfully');
-        },
-        error: (error) => {
-          alert(error.message || 'Unable to cancel booking');
-        },
-      });
+    if (!confirm('Are you sure you want to cancel this booking?')) {
+      return;
     }
+
+    this.bookingService.cancelBooking(booking.id).subscribe({
+      next: () => {
+        // Clear any existing timeout
+        if (this.cancelTimeout) {
+          clearTimeout(this.cancelTimeout);
+        }
+
+        // Update the booking status
+        booking.status = BookingStatus.CANCELLED;
+
+        this.filterBookings();
+
+        // Show success notification
+        this.cancelSuccessMessage = true;
+        this.cancelTimeout = setTimeout(() => {
+          this.cancelSuccessMessage = false;
+        }, 5000);
+      },
+      error: (error) => {
+        alert(error.message || 'Unable to cancel booking');
+      },
+    });
   }
 
   downloadTicket(booking: Booking): void {

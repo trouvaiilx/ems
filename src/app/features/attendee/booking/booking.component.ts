@@ -170,8 +170,19 @@ interface SelectedTicket {
 
             <div class="card">
               <div class="card-header">
-                <h3>Promotional Code</h3>
-                <p>Have a promo code? Apply it here</p>
+                <div class="header-with-icon">
+                  <svg class="header-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                      fill-rule="evenodd"
+                      d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div>
+                    <h3>Promotional Code</h3>
+                    <p>Have a promo code? Apply it here</p>
+                  </div>
+                </div>
               </div>
               <div class="promo-section">
                 <input
@@ -192,7 +203,7 @@ interface SelectedTicket {
                 </button>
               </div>
               @if (promoError) {
-              <div class="alert alert-error">
+              <div class="promo-alert alert-error">
                 <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
                   <path
                     fill-rule="evenodd"
@@ -203,7 +214,7 @@ interface SelectedTicket {
                 <span>{{ promoError }}</span>
               </div>
               } @if (promoSuccess) {
-              <div class="alert alert-success">
+              <div class="promo-alert alert-success">
                 <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
                   <path
                     fill-rule="evenodd"
@@ -319,6 +330,24 @@ interface SelectedTicket {
         margin: 0 auto;
       }
 
+      .header-with-icon {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .header-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        color: var(--accent-600);
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+      }
+
+      .header-with-icon > div {
+        flex: 1;
+      }
+
       .breadcrumb {
         margin-bottom: 1rem;
       }
@@ -389,7 +418,7 @@ interface SelectedTicket {
       .card-header h3 {
         font-size: 1.25rem;
         color: var(--primary-900);
-        margin-bottom: 0.25rem;
+        margin: 0 0 0.25rem 0;
       }
 
       .card-header p {
@@ -573,6 +602,35 @@ interface SelectedTicket {
         border: 1px solid var(--primary-300);
         border-radius: var(--radius-md);
         font-size: 0.9375rem;
+      }
+
+      .promo-alert {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius-md);
+        margin: 1.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+
+      .promo-alert .alert-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        flex-shrink: 0;
+      }
+
+      .promo-alert.alert-error {
+        background: var(--error-100);
+        border: 1px solid var(--error-600);
+        color: var(--error-700);
+      }
+
+      .promo-alert.alert-success {
+        background: var(--success-100);
+        border: 1px solid var(--success-600);
+        color: var(--success-700);
       }
 
       .summary-card {
@@ -918,6 +976,7 @@ export class BookingComponent implements OnInit {
         user.fullName,
         user.email,
         this.event.name,
+        this.event.date,
         this.getSubtotal(),
         this.discountAmount,
         this.getTotal()
