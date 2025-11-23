@@ -28,9 +28,7 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
             <p>Your tickets have been confirmed and sent to your email.</p>
           </div>
         </div>
-        } 
-        
-        @if (cancelSuccessMessage) {
+        } @if (cancelSuccessMessage) {
         <div class="alert alert-success">
           <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
             <path
@@ -262,7 +260,6 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
         margin: 0;
       }
 
-      /* FIXED: Success Alert Icon Size */
       .alert {
         display: flex;
         align-items: flex-start;
@@ -674,7 +671,6 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
         font-size: 0.75rem;
       }
 
-      /* FIXED: Empty State Spacing */
       .empty-state {
         text-align: center;
         padding: 5rem 2rem;
@@ -737,6 +733,7 @@ export class MyTicketsComponent implements OnInit, OnDestroy {
   loading = true;
   showSuccessMessage = false;
   cancelSuccessMessage = false;
+  private successTimeout: any;
   private cancelTimeout: any;
 
   constructor(
@@ -746,10 +743,13 @@ export class MyTicketsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // FIXED: Properly store timeout reference
     this.route.queryParams.subscribe((params) => {
       if (params['success'] === 'true') {
         this.showSuccessMessage = true;
-        setTimeout(() => (this.showSuccessMessage = false), 5000);
+        this.successTimeout = setTimeout(() => {
+          this.showSuccessMessage = false;
+        }, 5000);
       }
     });
 
@@ -760,6 +760,10 @@ export class MyTicketsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Clear both timeouts properly
+    if (this.successTimeout) {
+      clearTimeout(this.successTimeout);
+    }
     if (this.cancelTimeout) {
       clearTimeout(this.cancelTimeout);
     }
@@ -821,7 +825,7 @@ export class MyTicketsComponent implements OnInit, OnDestroy {
 
     this.bookingService.cancelBooking(booking.id).subscribe({
       next: () => {
-        // Clear any existing timeout
+        // Clear any existing timeout before setting new one
         if (this.cancelTimeout) {
           clearTimeout(this.cancelTimeout);
         }
@@ -831,7 +835,7 @@ export class MyTicketsComponent implements OnInit, OnDestroy {
 
         this.filterBookings();
 
-        // Show success notification
+        // Show success notification with proper timeout management
         this.cancelSuccessMessage = true;
         this.cancelTimeout = setTimeout(() => {
           this.cancelSuccessMessage = false;

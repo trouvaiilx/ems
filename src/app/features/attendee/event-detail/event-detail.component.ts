@@ -16,9 +16,11 @@ import { TicketType } from '../../../core/models/ticket.model';
   template: `
     <div class="event-detail-page">
       @if (loading) {
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading event details...</p>
+      <div class="loading-container">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading event details...</p>
+        </div>
       </div>
       } @else if (event) {
       <div class="event-hero">
@@ -317,6 +319,45 @@ import { TicketType } from '../../../core/models/ticket.model';
   `,
   styles: [
     `
+      /* Centered Loading State */
+      .loading-container {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-100);
+        z-index: 100;
+      }
+
+      .loading-state {
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .loading-state .spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid var(--primary-300);
+        border-top-color: var(--accent-600);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 1.5rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-state p {
+        color: var(--primary-600);
+        margin: 0;
+        font-size: 0.9375rem;
+        font-weight: 500;
+      }
+
       .event-detail-page {
         min-height: 100vh;
         background: var(--primary-100);
@@ -651,6 +692,20 @@ import { TicketType } from '../../../core/models/ticket.model';
         font-weight: 700;
         color: var(--primary-900);
         margin-left: 0.25rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-base);
+        font-size: 0.9375rem;
       }
 
       .btn-block {

@@ -1,4 +1,4 @@
-// src/app/features/attendee/booking/booking.component.ts - Modern Professional Version (Part 1)
+// src/app/features/attendee/booking/booking.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -25,9 +25,11 @@ interface SelectedTicket {
     <div class="booking-page">
       <div class="container">
         @if (loading) {
-        <div class="loading-state">
-          <div class="spinner"></div>
-          <p>Loading booking details...</p>
+        <div class="loading-container">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading booking details...</p>
+          </div>
         </div>
         } @else if (event) {
         <div class="booking-header">
@@ -315,6 +317,45 @@ interface SelectedTicket {
         min-height: 100vh;
         background: var(--primary-100);
         padding: 2rem 1rem 4rem;
+      }
+
+      /* Centered Loading State */
+      .loading-container {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-100);
+        z-index: 100;
+      }
+
+      .loading-state {
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .loading-state .spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid var(--primary-300);
+        border-top-color: var(--accent-600);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 1.5rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-state p {
+        color: var(--primary-600);
+        margin: 0;
+        font-size: 0.9375rem;
+        font-weight: 500;
       }
 
       .booking-header {
@@ -715,9 +756,47 @@ interface SelectedTicket {
         border-top: 2px solid var(--primary-300);
       }
 
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-base);
+        font-size: 0.9375rem;
+      }
+
       .btn-block {
         width: 100%;
-        justify-content: center;
+      }
+
+      .btn-primary {
+        background: var(--accent-600);
+        color: var(--neutral-white);
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-700);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn-secondary {
+        background: var(--primary-200);
+        color: var(--primary-900);
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background: var(--primary-300);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
 
       .warning-message {
@@ -862,7 +941,6 @@ export class BookingComponent implements OnInit {
     if (index !== -1) {
       if (this.selectedTickets[index].quantity > 1) {
         this.selectedTickets[index].quantity--;
-        // Remove extra seat selections
         const currentSeats = this.selectedTickets[index].seatNumbers.length;
         if (currentSeats > this.selectedTickets[index].quantity) {
           this.selectedTickets[index].seatNumbers.pop();
