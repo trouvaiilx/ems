@@ -3,6 +3,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { pendingChangesGuard } from './core/guards/pending-changes.guard';
 import { UserRole } from './core/models/user.model';
 
 export const routes: Routes = [
@@ -15,6 +16,11 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () =>
       import('./features/auth/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/register/register.component').then((m) => m.RegisterComponent),
   },
   {
     path: 'change-password',
@@ -131,6 +137,7 @@ export const routes: Routes = [
           import('./features/organizer/ticket-setup/ticket-setup.component').then(
             (m) => m.TicketSetupComponent
           ),
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'analytics',

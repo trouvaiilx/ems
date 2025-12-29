@@ -678,7 +678,7 @@ export class PaymentComponent implements OnInit {
     this.errorMessage = '';
 
     setTimeout(() => {
-      this.bookingService.confirmBooking(this.booking!.id).subscribe({
+      this.bookingService.processPayment(this.booking!.id).subscribe({
         next: () => {
           localStorage.removeItem('current_booking');
           this.router.navigate(['/my-tickets'], {

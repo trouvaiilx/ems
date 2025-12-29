@@ -1,6 +1,4 @@
-// src/app/features/attendee/home/home.component.ts
-
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
@@ -14,6 +12,14 @@ import { Event } from '../../../core/models/event.model';
     <div class="home-page">
       <!-- Hero Section -->
       <section class="hero">
+        <div class="hero-carousel">
+          @for (event of carouselEvents; track event.id; let i = $index) {
+          <div class="carousel-img-wrapper" [class.active]="i === currentHeroImageIndex">
+            <img [src]="event.posterUrl" class="carousel-img" alt="Background" />
+            <div class="carousel-overlay"></div>
+          </div>
+          }
+        </div>
         <div class="hero-container">
           <div class="hero-content">
             <h1 class="hero-title">Experience Professional Events</h1>
@@ -35,16 +41,23 @@ import { Event } from '../../../core/models/event.model';
             </div>
           </div>
           <div class="hero-visual">
+            @if (carouselEvents.length > 0) {
             <div class="visual-card">
               <div class="visual-card-header">
-                <span class="visual-badge">Live</span>
-                <span class="visual-date">Dec 15</span>
+                <span class="visual-badge">{{
+                  carouselEvents[currentHeroImageIndex]?.status || 'Live'
+                }}</span>
+                <span class="visual-date">{{
+                  carouselEvents[currentHeroImageIndex]?.date | date : 'MMM dd'
+                }}</span>
               </div>
               <div class="visual-card-content">
-                <h4>Tech Conference 2025</h4>
-                <p>500+ Attendees Expected</p>
+                <h4>{{ carouselEvents[currentHeroImageIndex]?.name }}</h4>
+                <p>{{ carouselEvents[currentHeroImageIndex]?.organizerName }}</p>
+                <p class="visual-time">{{ carouselEvents[currentHeroImageIndex]?.time }}</p>
               </div>
             </div>
+            }
           </div>
         </div>
       </section>
@@ -229,17 +242,57 @@ import { Event } from '../../../core/models/event.model';
       }
 
       .hero::before {
-        content: '';
+        background: radial-gradient(circle at 30% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 1;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+      }
+
+      .hero-carousel {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: radial-gradient(circle at 30% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 50%);
-        pointer-events: none;
+        z-index: 0;
+      }
+
+      .carousel-img-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+      }
+
+      .carousel-img-wrapper.active {
+        opacity: 1;
+      }
+
+      .carousel-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .carousel-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6); /* Dim the background */
       }
 
       .hero-container {
+        position: relative;
+        z-index: 2;
         max-width: 1200px;
         margin: 0 auto;
         display: grid;
@@ -285,6 +338,7 @@ import { Event } from '../../../core/models/event.model';
         box-shadow: var(--shadow-xl);
         padding: 1.5rem;
         animation: float 3s ease-in-out infinite;
+        min-width: 300px;
       }
 
       @keyframes float {
@@ -311,6 +365,7 @@ import { Event } from '../../../core/models/event.model';
         border-radius: 9999px;
         font-size: 0.75rem;
         font-weight: 600;
+        text-transform: uppercase;
       }
 
       .visual-date {
@@ -318,9 +373,16 @@ import { Event } from '../../../core/models/event.model';
         font-weight: 600;
       }
 
+      .visual-time {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--neutral-500);
+      }
+
       .visual-card-content h4 {
         color: var(--primary-900);
         margin-bottom: 0.5rem;
+        font-weight: 700;
       }
 
       .visual-card-content p {
@@ -579,9 +641,13 @@ import { Event } from '../../../core/models/event.model';
     `,
   ],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   upcomingEvents: Event[] = [];
   loading = true;
+
+  carouselEvents: Event[] = [];
+  currentHeroImageIndex = 0;
+  carouselInterval: any;
 
   constructor(private eventService: EventService) {}
 
@@ -589,15 +655,35 @@ export class HomeComponent implements OnInit {
     this.loadUpcomingEvents();
   }
 
+  ngOnDestroy(): void {
+    if (this.carouselInterval) {
+      clearInterval(this.carouselInterval);
+    }
+  }
+
   loadUpcomingEvents(): void {
     this.eventService.getUpcomingEvents().subscribe({
       next: (events) => {
         this.upcomingEvents = events;
+
+        // Setup carousel events (filter events with posters)
+        this.carouselEvents = events.filter((e) => e.posterUrl);
+
+        if (this.carouselEvents.length > 0) {
+          this.startCarousel();
+        }
+
         this.loading = false;
       },
       error: () => {
         this.loading = false;
       },
     });
+  }
+
+  startCarousel(): void {
+    this.carouselInterval = setInterval(() => {
+      this.currentHeroImageIndex = (this.currentHeroImageIndex + 1) % this.carouselEvents.length;
+    }, 5000);
   }
 }

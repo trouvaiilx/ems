@@ -434,10 +434,24 @@ export class EventListComponent implements OnInit {
     this.loadEvents();
   }
 
-  loadEvents(): void {
-    this.eventService.getUpcomingEvents().subscribe({
+  loadEvents(keyword?: string): void {
+    this.loading = true;
+    const filters: any = {};
+    if (keyword) filters.keyword = keyword;
+
+    // We want upcoming events mostly, but the backend filter logic for dates allows us to be specific.
+    // However, getUpcomingEvents acts as a CLIENT side filter on getAllEvents result in the service previously.
+    // Now getAllEvents returns published events.
+    // Let's just use getAllEvents directly with filters.
+
+    // Default to future dates?
+    // The previous getUpcomingEvents filtered for date >= now.
+    filters.startDate = new Date().toISOString();
+
+    this.eventService.getAllEvents(filters).subscribe({
       next: (events) => {
         this.events = events;
+        // filteredEvents is now just events because filtering happened on server
         this.filteredEvents = events;
         this.sortEvents();
         this.loading = false;
@@ -449,14 +463,8 @@ export class EventListComponent implements OnInit {
   }
 
   filterEvents(): void {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredEvents = this.events.filter(
-      (event) =>
-        event.name.toLowerCase().includes(term) ||
-        event.description.toLowerCase().includes(term) ||
-        event.organizerName.toLowerCase().includes(term)
-    );
-    this.sortEvents();
+    // rudimentary debounce could be added here
+    this.loadEvents(this.searchTerm);
   }
 
   sortEvents(): void {

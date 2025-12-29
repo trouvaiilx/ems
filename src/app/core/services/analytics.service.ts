@@ -1,8 +1,11 @@
 // src/app/core/services/analytics.service.ts
 
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { delay, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
 
 export interface SalesReport {
   period: string;
@@ -26,44 +29,61 @@ export interface AuditoriumUsageReport {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AnalyticsService {
-  
-  getSalesReport(eventId: string, period: 'daily' | 'weekly' | 'monthly'): Observable<SalesReport[]> {
-    // Mock data - would fetch from backend
-    const mockData: SalesReport[] = [
-      { period: '2025-11-10', ticketsSold: 45, revenue: 6750, averageTicketPrice: 150 },
-      { period: '2025-11-11', ticketsSold: 38, revenue: 5700, averageTicketPrice: 150 },
-      { period: '2025-11-12', ticketsSold: 52, revenue: 7800, averageTicketPrice: 150 }
-    ];
+  private organizerUrl = `${environment.apiUrl}/organizer/analytics`;
 
-    return of(mockData).pipe(delay(500));
+  constructor(private http: HttpClient, private authService: AuthService) {}
+
+  private getAuthHeaders() {
+    return {
+      headers: { Authorization: `Bearer ${this.authService.getToken()}` },
+    };
   }
 
-  getOccupancyReport(eventId: string, period: 'daily' | 'weekly' | 'monthly'): Observable<OccupancyReport[]> {
-    const mockData: OccupancyReport[] = [
-      { period: '2025-11-10', totalSeats: 500, occupiedSeats: 425, occupancyRate: 85 },
-      { period: '2025-11-11', totalSeats: 500, occupiedSeats: 463, occupancyRate: 92.6 },
-      { period: '2025-11-12', totalSeats: 500, occupiedSeats: 489, occupancyRate: 97.8 }
-    ];
+  getSalesReport(
+    eventId: string,
+    period: 'daily' | 'weekly' | 'monthly'
+  ): Observable<SalesReport[]> {
+    return this.http
+      .get<any>(this.organizerUrl, {
+        ...this.getAuthHeaders(),
+        params: { eventId, period },
+      })
+      .pipe(map((res) => res.salesReports));
+  }
 
-    return of(mockData).pipe(delay(500));
+  getOccupancyReport(
+    eventId: string,
+    period: 'daily' | 'weekly' | 'monthly'
+  ): Observable<OccupancyReport[]> {
+    return this.http
+      .get<any>(this.organizerUrl, {
+        ...this.getAuthHeaders(),
+        params: { eventId, period },
+      })
+      .pipe(map((res) => res.occupancyReports));
   }
 
   getAuditoriumUsageReport(period: 'weekly' | 'monthly'): Observable<AuditoriumUsageReport[]> {
-    const mockData: AuditoriumUsageReport[] = [
-      { period: 'Week 1', eventsHosted: 3, totalRevenue: 45000, averageOccupancy: 87.5 },
-      { period: 'Week 2', eventsHosted: 4, totalRevenue: 62000, averageOccupancy: 91.2 },
-      { period: 'Week 3', eventsHosted: 2, totalRevenue: 28000, averageOccupancy: 78.3 }
-    ];
-
-    return of(mockData).pipe(delay(500));
+    return this.http.get<AuditoriumUsageReport[]>(`${environment.apiUrl}/admin/analytics`, {
+      params: { period },
+    });
   }
 
-  exportReport(data: any[], format: 'pdf' | 'csv'): Observable<Blob> {
-    // Mock export - would generate actual file
-    const mockBlob = new Blob(['Mock report data'], { type: format === 'pdf' ? 'application/pdf' : 'text/csv' });
-    return of(mockBlob).pipe(delay(1000));
+  exportReport(format: 'pdf' | 'csv'): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/organizer/export`, {
+      ...this.getAuthHeaders(),
+      params: { format },
+      responseType: 'blob',
+    });
+  }
+
+  exportAdminReport(period: 'weekly' | 'monthly', format: 'pdf' | 'csv'): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/admin/export`, {
+      params: { period, format },
+      responseType: 'blob',
+    });
   }
 }

@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { UserService } from '../../../core/services/user.service';
 
 interface OrganizerRegistrationForm {
   fullName: string;
@@ -279,7 +280,7 @@ export class RegisterOrganizerComponent {
   generatedUsername = '';
   generatedPassword = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private userService: UserService) {}
 
   onSubmit(): void {
     this.errorMessage = '';
@@ -291,23 +292,28 @@ export class RegisterOrganizerComponent {
 
     this.loading = true;
 
-    // Simulate API call
-    setTimeout(() => {
-      // Generate credentials
-      this.generatedUsername = this.generateUsername(this.form.fullName);
-      this.generatedPassword = this.generatePassword();
+    this.userService.createOrganizer(this.form).subscribe({
+      next: (res) => {
+        this.generatedUsername = res.username;
+        this.generatedPassword = res.password;
 
-      this.successMessage =
-        `Account created successfully for ${this.form.fullName}. ` +
-        `A welcome email with login credentials has been sent to ${this.form.email}.`;
+        this.successMessage =
+          `Account created successfully for ${this.form.fullName}. ` +
+          `A welcome email with login credentials has been sent to ${this.form.email}.`;
 
-      this.loading = false;
+        this.loading = false;
 
-      // Reset form after 5 seconds
-      setTimeout(() => {
-        this.resetForm();
-      }, 5000);
-    }, 1000);
+        // Reset form after a delay if desired, or keep it to show credentials
+        // keeping credentials visible is important here because we just showed them.
+        setTimeout(() => {
+          this.resetForm();
+        }, 10000); // Increased timeout to read credentials
+      },
+      error: (err) => {
+        this.loading = false;
+        this.errorMessage = err.error?.message || 'Registration failed';
+      },
+    });
   }
 
   validateForm(): boolean {

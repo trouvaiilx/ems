@@ -1,84 +1,116 @@
-// src/app/core/services/waitlist.service.ts
+// src/app/core/services/waitlist.service.ts - BACKEND INTEGRATED
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { Waitlist } from '../models/booking.model';
+import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WaitlistService {
-  private waitlistSubject = new BehaviorSubject<Waitlist[]>([]);
-  public waitlist$ = this.waitlistSubject.asObservable();
+  private apiUrl = `${environment.apiUrl}/bookings/waitlist`;
 
-  private readonly MAX_WAITLIST_SIZE = 100;
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
-  joinWaitlist(eventId: string, attendeeId: string, email: string, phone: string): Observable<Waitlist> {
-    return this.waitlist$.pipe(
-      delay(500),
-      map(waitlist => {
-        const eventWaitlist = waitlist.filter(w => w.eventId === eventId);
-        
-        if (eventWaitlist.length >= this.MAX_WAITLIST_SIZE) {
-          throw new Error('Waitlist is full');
-        }
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
+  }
 
-        if (eventWaitlist.some(w => w.attendeeId === attendeeId)) {
-          throw new Error('Already on waitlist');
-        }
+  private mapWaitlistFromResponse(data: any): Waitlist {
+    return {
+      id: data._id,
+      eventId: data.eventId,
+      attendeeId: data.attendeeId,
+      attendeeEmail: data.attendeeEmail,
+      attendeePhone: data.attendeePhone,
+      joinedAt: new Date(data.createdAt),
+      notified: data.notified || false,
+    };
+  }
 
-        const newEntry: Waitlist = {
-          id: Date.now().toString(),
+  joinWaitlist(
+    eventId: string,
+    attendeeId: string,
+    email: string,
+    phone: string
+  ): Observable<Waitlist> {
+    return this.http
+      .post<any>(
+        this.apiUrl,
+        {
           eventId,
-          attendeeId,
-          attendeeEmail: email,
-          attendeePhone: phone,
-          joinedAt: new Date(),
-          notified: false
-        };
-
-        this.waitlistSubject.next([...waitlist, newEntry]);
-        return newEntry;
-      })
-    );
+          email,
+          phone,
+        },
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
+      .pipe(
+        map((response) => this.mapWaitlistFromResponse(response)),
+        catchError((error) => {
+          console.error('Join waitlist error:', error);
+          return throwError(() => new Error(error.error?.message || 'Failed to join waitlist'));
+        })
+      );
   }
 
   leaveWaitlist(waitlistId: string): Observable<boolean> {
-    return of(waitlistId).pipe(
-      delay(300),
-      map(id => {
-        const current = this.waitlistSubject.value;
-        const filtered = current.filter(w => w.id !== id);
-        this.waitlistSubject.next(filtered);
-        return true;
+    // Note: Backend doesn't have leave waitlist endpoint yet
+    return this.http
+      .delete<any>(`${this.apiUrl}/${waitlistId}`, {
+        headers: this.getAuthHeaders(),
       })
-    );
+      .pipe(
+        map(() => true),
+        catchError((error) => {
+          console.error('Leave waitlist error:', error);
+          return throwError(() => new Error('Failed to leave waitlist'));
+        })
+      );
   }
 
   getWaitlistByEvent(eventId: string): Observable<Waitlist[]> {
-    return this.waitlist$.pipe(
-      delay(300),
-      map(waitlist => waitlist.filter(w => w.eventId === eventId))
-    );
+    // Note: Backend doesn't have get waitlist endpoint yet
+    return this.http
+      .get<any[]>(`${this.apiUrl}/event/${eventId}`, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(
+        map((waitlist) => waitlist.map((w) => this.mapWaitlistFromResponse(w))),
+        catchError((error) => {
+          console.error('Get waitlist error:', error);
+          return throwError(() => new Error('Failed to fetch waitlist'));
+        })
+      );
   }
 
   notifyNextInLine(eventId: string): Observable<Waitlist | null> {
-    return this.waitlist$.pipe(
-      delay(500),
-      map(waitlist => {
-        const eventWaitlist = waitlist
-          .filter(w => w.eventId === eventId && !w.notified)
-          .sort((a, b) => a.joinedAt.getTime() - b.joinedAt.getTime());
-
-        if (eventWaitlist.length > 0) {
-          const next = eventWaitlist[0];
-          next.notified = true;
-          this.waitlistSubject.next([...waitlist]);
-          return next;
+    // Note: Backend doesn't have notify endpoint yet
+    return this.http
+      .post<any>(
+        `${this.apiUrl}/notify`,
+        {
+          eventId,
+        },
+        {
+          headers: this.getAuthHeaders(),
         }
-        return null;
-      })
-    );
+      )
+      .pipe(
+        map((response) => (response ? this.mapWaitlistFromResponse(response) : null)),
+        catchError((error) => {
+          console.error('Notify waitlist error:', error);
+          return throwError(() => new Error('Failed to notify waitlist'));
+        })
+      );
   }
 }

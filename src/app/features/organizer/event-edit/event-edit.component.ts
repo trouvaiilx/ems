@@ -53,11 +53,52 @@ import { Event } from '../../../core/models/event.model';
             </div>
 
             <div class="form-group">
-              <label for="poster">Event Poster URL (Optional)</label>
-              <input type="url" id="poster" [(ngModel)]="event.posterUrl" name="poster" />
-              @if (event.posterUrl) {
+              <label>Event Poster</label>
+              <div class="upload-options">
+                <button
+                  type="button"
+                  class="toggle-btn"
+                  [class.active]="uploadType === 'url'"
+                  (click)="setUploadType('url')"
+                >
+                  Image URL
+                </button>
+                <button
+                  type="button"
+                  class="toggle-btn"
+                  [class.active]="uploadType === 'file'"
+                  (click)="setUploadType('file')"
+                >
+                  Upload Image
+                </button>
+              </div>
+
+              @if (uploadType === 'url') {
+              <input
+                type="url"
+                id="poster"
+                [(ngModel)]="event.posterUrl"
+                name="poster"
+                placeholder="https://example.com/poster.jpg"
+                (change)="updateUrlPreview()"
+              />
+              } @else {
+              <div class="file-upload-container">
+                <input
+                  type="file"
+                  id="fileUpload"
+                  (change)="onFileSelected($event)"
+                  accept="image/png, image/jpeg, image/jpg"
+                  class="file-input"
+                />
+                <small>Max size: 1MB. Formats: JPG, PNG</small>
+              </div>
+              } @if (previewUrl) {
               <div class="poster-preview">
-                <img [src]="event.posterUrl" alt="Event poster" />
+                <img [src]="previewUrl" alt="Event poster" />
+                @if (uploadType === 'file') {
+                <button type="button" class="btn-remove" (click)="clearFile()">×</button>
+                }
               </div>
               }
             </div>
@@ -87,11 +128,14 @@ import { Event } from '../../../core/models/event.model';
           <div class="success-message">{{ successMessage }}</div>
           }
 
-          <div class="form-actions">
-            <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
-            <button type="submit" class="btn btn-primary" [disabled]="loading">
-              {{ loading ? 'Saving Changes...' : 'Save Changes' }}
-            </button>
+          <div class="form-actions display-flex space-between">
+            <button type="button" class="btn btn-danger" (click)="onDelete()">Delete Event</button>
+            <div class="right-actions">
+              <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
+                {{ loading ? 'Saving Changes...' : 'Save Changes' }}
+              </button>
+            </div>
           </div>
         </form>
         } @else {
@@ -225,8 +269,14 @@ import { Event } from '../../../core/models/event.model';
 
       .form-actions {
         display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+      }
+
+      .right-actions {
+        display: flex;
         gap: 1rem;
-        justify-content: flex-end;
       }
 
       .btn {
@@ -259,6 +309,15 @@ import { Event } from '../../../core/models/event.model';
         background: var(--primary-300);
       }
 
+      .btn-danger {
+        background: var(--error-100);
+        color: var(--error-700);
+      }
+
+      .btn-danger:hover {
+        background: var(--error-200);
+      }
+
       .btn:disabled {
         opacity: 0.6;
         cursor: not-allowed;
@@ -288,9 +347,71 @@ import { Event } from '../../../core/models/event.model';
         }
       }
 
+      .upload-options {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .toggle-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--primary-200);
+        background: var(--neutral-white);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--primary-600);
+      }
+
+      .toggle-btn.active {
+        background: var(--primary-100);
+        border-color: var(--accent-500);
+        color: var(--accent-600);
+      }
+
+      .file-input {
+        padding: 0.5rem;
+        border: 2px dashed var(--primary-300);
+        background: var(--primary-100);
+      }
+
+      .btn-remove {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .poster-preview {
+        position: relative;
+      }
+
       @media (max-width: 768px) {
         .form-row {
           grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .right-actions {
+          width: 100%;
+          justify-content: flex-end;
+        }
+
+        .btn-danger {
+          width: 100%;
         }
       }
     `,
@@ -302,6 +423,10 @@ export class EventEditComponent implements OnInit {
   loading = false;
   errorMessage = '';
   successMessage = '';
+
+  uploadType: 'url' | 'file' = 'url';
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -316,8 +441,51 @@ export class EventEditComponent implements OnInit {
         next: (event) => {
           this.event = event;
           this.eventDate = new Date(event!.date).toISOString().split('T')[0];
+          this.previewUrl = event?.posterUrl || null;
         },
       });
+    }
+  }
+
+  setUploadType(type: 'url' | 'file'): void {
+    this.uploadType = type;
+    this.previewUrl = type === 'url' ? this.event?.posterUrl || null : null;
+    this.selectedFile = null;
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > 1024 * 1024) {
+        // 1MB
+        this.errorMessage = 'File size exceeds 1MB limit.';
+        event.target.value = '';
+        return;
+      }
+
+      this.selectedFile = file;
+      this.errorMessage = '';
+
+      // Preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  clearFile(): void {
+    this.selectedFile = null;
+    this.previewUrl = null;
+    const input = document.getElementById('fileUpload') as HTMLInputElement;
+    if (input) input.value = '';
+  }
+
+  // Update preview when URL changes
+  updateUrlPreview(): void {
+    if (this.uploadType === 'url' && this.event) {
+      this.previewUrl = this.event.posterUrl || null;
     }
   }
 
@@ -328,12 +496,30 @@ export class EventEditComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const updates = {
+    const updates: any = {
       ...this.event,
       date: new Date(this.eventDate),
     };
 
-    this.eventService.updateEvent(this.event.id, updates).subscribe({
+    let payload: any | FormData;
+
+    if (this.uploadType === 'file' && this.selectedFile) {
+      const formData = new FormData();
+      formData.append('name', this.event.name);
+      formData.append('description', this.event.description);
+      formData.append('date', new Date(this.eventDate).toISOString());
+      formData.append('time', this.event.time);
+      formData.append('status', this.event.status);
+      if (this.event.posterUrl) {
+        formData.append('posterUrl', this.event.posterUrl);
+      }
+      formData.append('image', this.selectedFile);
+      payload = formData;
+    } else {
+      payload = updates;
+    }
+
+    this.eventService.updateEvent(this.event.id, payload).subscribe({
       next: () => {
         this.successMessage = 'Event updated successfully!';
         setTimeout(() => {
@@ -342,6 +528,26 @@ export class EventEditComponent implements OnInit {
       },
       error: () => {
         this.errorMessage = 'Failed to update event';
+        this.loading = false;
+      },
+    });
+  }
+
+  onDelete(): void {
+    if (
+      !this.event ||
+      !confirm('Are you sure you want to delete this event? This action cannot be undone.')
+    )
+      return;
+
+    this.loading = true;
+    this.eventService.deleteEvent(this.event.id).subscribe({
+      next: () => {
+        this.router.navigate(['/organizer/dashboard']);
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = 'Failed to delete event';
         this.loading = false;
       },
     });

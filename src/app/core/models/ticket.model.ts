@@ -4,13 +4,13 @@ export enum TicketCategory {
   GENERAL_ADMISSION = 'GENERAL_ADMISSION',
   VIP = 'VIP',
   SENIOR_CITIZEN = 'SENIOR_CITIZEN',
-  CHILD = 'CHILD'
+  CHILD = 'CHILD',
 }
 
 export enum SeatingSection {
   BALCONY = 'BALCONY',
   MEZZANINE = 'MEZZANINE',
-  STALL = 'STALL'
+  STALL = 'STALL',
 }
 
 export interface TicketType {
@@ -21,7 +21,13 @@ export interface TicketType {
   section: SeatingSection;
   maxTickets: number;
   soldTickets: number;
+  waitlistAllocation: number;
   availableTickets: number;
+  seatConfig?: {
+    rows: number;
+    seatsPerRow: number;
+    rowLabelType: 'ALPHABET' | 'NUMBER';
+  };
 }
 
 export interface PromotionalCode {

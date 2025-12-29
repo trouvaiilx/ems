@@ -74,17 +74,52 @@ import { CreateEventRequest } from '../../../core/models/event.model';
             </div>
 
             <div class="form-group">
-              <label for="poster">Event Poster URL (Optional)</label>
+              <label>Event Poster</label>
+              <div class="upload-options">
+                <button
+                  type="button"
+                  class="toggle-btn"
+                  [class.active]="uploadType === 'url'"
+                  (click)="setUploadType('url')"
+                >
+                  Image URL
+                </button>
+                <button
+                  type="button"
+                  class="toggle-btn"
+                  [class.active]="uploadType === 'file'"
+                  (click)="setUploadType('file')"
+                >
+                  Upload Image
+                </button>
+              </div>
+
+              @if (uploadType === 'url') {
               <input
                 type="url"
                 id="poster"
                 [(ngModel)]="eventData.posterUrl"
                 name="poster"
                 placeholder="https://example.com/poster.jpg"
+                (change)="updateUrlPreview()"
               />
-              @if (eventData.posterUrl) {
+              } @else {
+              <div class="file-upload-container">
+                <input
+                  type="file"
+                  id="fileUpload"
+                  (change)="onFileSelected($event)"
+                  accept="image/png, image/jpeg, image/jpg"
+                  class="file-input"
+                />
+                <small>Max size: 1MB. Formats: JPG, PNG</small>
+              </div>
+              } @if (previewUrl) {
               <div class="poster-preview">
-                <img [src]="eventData.posterUrl" alt="Poster preview" />
+                <img [src]="previewUrl" alt="Poster preview" />
+                @if (uploadType === 'file') {
+                <button type="button" class="btn-remove" (click)="clearFile()">×</button>
+                }
               </div>
               }
             </div>
@@ -274,6 +309,54 @@ import { CreateEventRequest } from '../../../core/models/event.model';
         opacity: 0.6;
         cursor: not-allowed;
       }
+
+      .upload-options {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .toggle-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--primary-200);
+        background: var(--neutral-white);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--primary-600);
+      }
+
+      .toggle-btn.active {
+        background: var(--primary-100);
+        border-color: var(--accent-500);
+        color: var(--accent-600);
+      }
+
+      .file-input {
+        padding: 0.5rem;
+        border: 2px dashed var(--primary-300);
+        background: var(--primary-100);
+      }
+
+      .btn-remove {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .poster-preview {
+        position: relative;
+      }
     `,
   ],
 })
@@ -294,11 +377,57 @@ export class EventCreateComponent {
   dateCheckMessage = '';
   isDateAvailable = true;
 
+  uploadType: 'url' | 'file' = 'url';
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
+
   constructor(
     private eventService: EventService,
     private authService: AuthService,
     private router: Router
   ) {}
+
+  setUploadType(type: 'url' | 'file'): void {
+    this.uploadType = type;
+    this.previewUrl = type === 'url' ? this.eventData.posterUrl || null : null;
+    this.selectedFile = null;
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > 1024 * 1024) {
+        // 1MB
+        this.errorMessage = 'File size exceeds 1MB limit.';
+        event.target.value = '';
+        return;
+      }
+
+      this.selectedFile = file;
+      this.errorMessage = '';
+
+      // Preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  clearFile(): void {
+    this.selectedFile = null;
+    this.previewUrl = null;
+    const input = document.getElementById('fileUpload') as HTMLInputElement;
+    if (input) input.value = '';
+  }
+
+  // Update preview when URL changes
+  updateUrlPreview(): void {
+    if (this.uploadType === 'url') {
+      this.previewUrl = this.eventData.posterUrl || null;
+    }
+  }
 
   checkDateAvailability(): void {
     if (!this.eventDate) return;
@@ -313,6 +442,16 @@ export class EventCreateComponent {
   }
 
   onSubmit(): void {
+    if (
+      !this.eventData.name ||
+      !this.eventData.description ||
+      !this.eventDate ||
+      !this.eventData.time
+    ) {
+      this.errorMessage = 'Please fill in all required fields.';
+      return;
+    }
+
     if (!this.isDateAvailable) return;
 
     this.loading = true;
@@ -328,7 +467,21 @@ export class EventCreateComponent {
       return;
     }
 
-    this.eventService.createEvent(this.eventData, user.id, user.fullName).subscribe({
+    let requestData: CreateEventRequest | FormData;
+
+    if (this.uploadType === 'file' && this.selectedFile) {
+      const formData = new FormData();
+      formData.append('name', this.eventData.name);
+      formData.append('description', this.eventData.description);
+      formData.append('date', this.eventData.date.toISOString());
+      formData.append('time', this.eventData.time);
+      formData.append('image', this.selectedFile);
+      requestData = formData;
+    } else {
+      requestData = this.eventData;
+    }
+
+    this.eventService.createEvent(requestData, user.id, user.fullName).subscribe({
       next: (event) => {
         this.successMessage = 'Event created successfully!';
         setTimeout(() => {

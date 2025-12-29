@@ -1,16 +1,56 @@
-// src/app/core/services/booking.service.ts (FIXED)
+// src/app/core/services/booking.service.ts - BACKEND INTEGRATED
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { Booking, BookingStatus, CreateBookingRequest } from '../models/booking.model';
+import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BookingService {
-  private bookingsSubject = new BehaviorSubject<Booking[]>([]);
-  public bookings$ = this.bookingsSubject.asObservable();
+  private apiUrl = `${environment.apiUrl}/bookings`;
+
+  constructor(private http: HttpClient, private authService: AuthService) {}
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
+  }
+
+  private mapBookingFromResponse(data: any): Booking {
+    return {
+      id: data._id,
+      eventId: data.eventId,
+      eventName: data.eventName,
+      eventDate: new Date(data.eventDate),
+      attendeeId: data.attendeeId,
+      attendeeName: data.attendeeName,
+      attendeeEmail: data.attendeeEmail,
+      tickets: data.tickets.map((t: any) => ({
+        ticketTypeId: t.ticketTypeId,
+        category: t.category,
+        section: t.section,
+        seatNumber: t.seatNumber,
+        price: t.price,
+      })),
+      totalAmount: data.totalAmount,
+      discountApplied: data.discountApplied || 0,
+      finalAmount: data.finalAmount,
+      promoCode: data.promoCode,
+      qrCode: data.qrCode,
+      status: data.status as BookingStatus,
+      bookingDate: new Date(data.createdAt),
+      checkedIn: data.checkedIn || false,
+      checkedInAt: data.checkedInAt ? new Date(data.checkedInAt) : undefined,
+    };
+  }
 
   createBooking(
     request: CreateBookingRequest,
@@ -23,120 +63,142 @@ export class BookingService {
     discountApplied: number,
     finalAmount: number
   ): Observable<Booking> {
-    // Generate QR code
-    const qrCode = `QR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-    const newBooking: Booking = {
-      id: Date.now().toString(),
+    const payload = {
       eventId: request.eventId,
-      eventName: eventName,
-      eventDate: eventDate,
-      attendeeId,
-      attendeeName,
-      attendeeEmail,
-      tickets: request.tickets.flatMap((t) =>
-        t.seatNumbers.map((seat) => ({
-          ticketTypeId: t.ticketTypeId,
-          category: t.category,
-          section: t.section,
-          seatNumber: seat,
-          price: t.price,
-        }))
-      ),
-      totalAmount: totalAmount,
-      discountApplied: discountApplied,
-      finalAmount: finalAmount,
+      tickets: request.tickets.map((t) => ({
+        ticketTypeId: t.ticketTypeId,
+        quantity: t.quantity,
+        seatNumbers: t.seatNumbers,
+      })),
       promoCode: request.promoCode,
-      qrCode,
-      status: BookingStatus.PENDING,
-      bookingDate: new Date(),
-      checkedIn: false,
     };
 
-    return of(newBooking).pipe(
-      delay(500),
-      map((booking) => {
-        const current = this.bookingsSubject.value;
-        this.bookingsSubject.next([...current, booking]);
-        return booking;
+    return this.http
+      .post<any>(this.apiUrl, payload, {
+        headers: this.getAuthHeaders(),
       })
-    );
+      .pipe(
+        map((response) => this.mapBookingFromResponse(response)),
+        catchError((error) => {
+          console.error('Create booking error:', error);
+          return throwError(() => new Error(error.error?.message || 'Failed to create booking'));
+        })
+      );
+  }
+
+  processPayment(bookingId: string): Observable<Booking> {
+    return this.http
+      .post<any>(
+        `${this.apiUrl}/pay`,
+        { bookingId },
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
+      .pipe(
+        map((response) => this.mapBookingFromResponse(response.booking)),
+        catchError((error) => {
+          console.error('Payment error:', error);
+          return throwError(() => new Error(error.error?.message || 'Payment failed'));
+        })
+      );
   }
 
   confirmBooking(bookingId: string): Observable<Booking> {
-    return of(bookingId).pipe(
-      delay(500),
-      map((id) => {
-        const current = this.bookingsSubject.value;
-        const index = current.findIndex((b) => b.id === id);
-        if (index !== -1) {
-          current[index].status = BookingStatus.CONFIRMED;
-          this.bookingsSubject.next([...current]);
-          return current[index];
-        }
-        throw new Error('Booking not found');
-      })
-    );
+    // Backend auto-confirms bookings, so this just fetches the booking
+    // This might be redundant now with processPayment but kept for compatibility
+    return this.getBookingById(bookingId);
   }
 
   cancelBooking(bookingId: string): Observable<boolean> {
-    return this.bookings$.pipe(
-      delay(500),
-      map((bookings) => {
-        const index = bookings.findIndex((b) => b.id === bookingId);
-        if (index !== -1) {
-          const booking = bookings[index];
-
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          const eventDate = new Date(booking.eventDate);
-          eventDate.setHours(0, 0, 0, 0);
-
-          const daysDifference = Math.ceil(
-            (eventDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
-          );
-
-          if (daysDifference >= 7) {
-            bookings[index].status = BookingStatus.CANCELLED;
-            this.bookingsSubject.next([...bookings]);
-            return true;
-          }
-          throw new Error('Cannot cancel booking less than 7 days before event');
+    // Note: Backend doesn't have cancel endpoint yet, you'll need to add it
+    // For now, this is a placeholder
+    return this.http
+      .put<any>(
+        `${this.apiUrl}/${bookingId}/cancel`,
+        {},
+        {
+          headers: this.getAuthHeaders(),
         }
-        throw new Error('Booking not found');
-      })
-    );
+      )
+      .pipe(
+        map(() => true),
+        catchError((error) => {
+          console.error('Cancel booking error:', error);
+          return throwError(() => new Error(error.error?.message || 'Failed to cancel booking'));
+        })
+      );
   }
 
   getBookingsByAttendee(attendeeId: string): Observable<Booking[]> {
-    return this.bookings$.pipe(
-      delay(300),
-      map((bookings) => bookings.filter((b) => b.attendeeId === attendeeId))
-    );
+    return this.http
+      .get<any[]>(`${this.apiUrl}/my`, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(
+        map((bookings) => bookings.map((b) => this.mapBookingFromResponse(b))),
+        catchError((error) => {
+          console.error('Get bookings error:', error);
+          return throwError(() => new Error('Failed to fetch bookings'));
+        })
+      );
   }
 
-  getBookingById(bookingId: string): Observable<Booking | undefined> {
-    return this.bookings$.pipe(
-      delay(300),
-      map((bookings) => bookings.find((b) => b.id === bookingId))
-    );
+  getBookingById(bookingId: string): Observable<Booking> {
+    return this.http
+      .get<any>(`${this.apiUrl}/${bookingId}`, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(
+        map((booking) => this.mapBookingFromResponse(booking)),
+        catchError((error) => {
+          console.error('Get booking error:', error);
+          return throwError(() => new Error('Failed to fetch booking'));
+        })
+      );
+  }
+
+  getEventBookings(eventId: string): Observable<Booking[]> {
+    return this.http
+      .get<any[]>(`${this.apiUrl}/event/${eventId}`, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(
+        map((bookings) => bookings.map((b) => this.mapBookingFromResponse(b))),
+        catchError((error) => {
+          console.error('Get event bookings error:', error);
+          return throwError(() => new Error('Failed to fetch event bookings'));
+        })
+      );
+  }
+
+  getBookedSeats(eventId: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/event/${eventId}/seats`);
   }
 
   checkInBooking(qrCode: string): Observable<Booking> {
-    return of(qrCode).pipe(
-      delay(500),
-      map((code) => {
-        const current = this.bookingsSubject.value;
-        const index = current.findIndex((b) => b.qrCode === code);
-        if (index !== -1) {
-          current[index].checkedIn = true;
-          current[index].checkedInAt = new Date();
-          this.bookingsSubject.next([...current]);
-          return current[index];
+    // Note: Backend doesn't have check-in endpoint yet, you'll need to add it
+    return this.http
+      .put<any>(
+        `${this.apiUrl}/checkin`,
+        { qrCode },
+        {
+          headers: this.getAuthHeaders(),
         }
-        throw new Error('Invalid QR code');
-      })
-    );
+      )
+      .pipe(
+        map((booking) => this.mapBookingFromResponse(booking)),
+        catchError((error) => {
+          console.error('Check-in error:', error);
+          return throwError(() => new Error(error.error?.message || 'Invalid QR code'));
+        })
+      );
+  }
+
+  downloadTicket(bookingId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${bookingId}/download`, {
+      headers: this.getAuthHeaders(),
+      responseType: 'blob',
+    });
   }
 }

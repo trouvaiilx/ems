@@ -1,6 +1,6 @@
 // src/app/features/admin/analytics/admin-analytics.component.ts
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AnalyticsService, AuditoriumUsageReport } from '../../../core/services/analytics.service';
@@ -25,16 +25,61 @@ import { AnalyticsService, AuditoriumUsageReport } from '../../../core/services/
               <option value="monthly">Monthly</option>
             </select>
           </div>
-          <button (click)="exportReport()" class="btn btn-primary">
-            <svg viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fill-rule="evenodd"
-                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            Export Report
-          </button>
+          <div class="export-dropdown" #dropdownRef>
+            <button
+              class="btn btn-primary dropdown-trigger"
+              (click)="showExportMenu = !showExportMenu"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+              Export Report
+              <svg
+                class="chevron"
+                [class.rotated]="showExportMenu"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
+            @if (showExportMenu) {
+            <div class="dropdown-menu">
+              <button (click)="exportReport('csv')" class="dropdown-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                Export as CSV
+              </button>
+              <button (click)="exportReport('pdf')" class="dropdown-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
+                </svg>
+                Export as PDF
+              </button>
+            </div>
+            }
+          </div>
         </div>
 
         @if (loading) {
@@ -252,27 +297,124 @@ import { AnalyticsService, AuditoriumUsageReport } from '../../../core/services/
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
       }
 
+      /* Dropdown Styles */
+      .export-dropdown {
+        position: relative;
+      }
+
+      .dropdown-trigger {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 160px;
+        justify-content: space-between;
+      }
+
+      .chevron {
+        width: 1.25rem;
+        height: 1.25rem;
+        transition: transform var(--transition-base);
+      }
+
+      .chevron.rotated {
+        transform: rotate(180deg);
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background: var(--neutral-white);
+        border: 1px solid var(--primary-200);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        min-width: 200px;
+        z-index: 50;
+        padding: 0.5rem;
+        animation: slideDown 0.2s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: none;
+        color: var(--primary-700);
+        font-weight: 500;
+        font-size: 0.875rem;
+        cursor: pointer;
+        border-radius: var(--radius-sm);
+        transition: all var(--transition-fast);
+        text-align: left;
+      }
+
+      .dropdown-item:hover {
+        background: var(--primary-50);
+        color: var(--accent-600);
+      }
+
+      .dropdown-item svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--primary-400);
+      }
+
+      .dropdown-item:hover svg {
+        color: var(--accent-600);
+      }
+
+      .btn-outline {
+        border: 1px solid var(--primary-300);
+        background: var(--neutral-white);
+        color: var(--primary-700);
+      }
+
+      .btn-outline:hover {
+        border-color: var(--primary-400);
+        background: var(--primary-50);
+        color: var(--primary-900);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+
       .btn {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
+        padding: 0.625rem 1.25rem;
         border: none;
         border-radius: var(--radius-md);
         font-weight: 600;
         cursor: pointer;
         transition: all var(--transition-base);
-        font-size: 0.9375rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
       }
 
       .btn svg {
-        width: 1.125rem;
-        height: 1.125rem;
+        width: 1.25rem;
+        height: 1.25rem;
       }
 
       .btn-primary {
         background: var(--accent-600);
         color: var(--neutral-white);
+        border: 1px solid transparent;
       }
 
       .btn-primary:hover {
@@ -555,8 +697,22 @@ export class AdminAnalyticsComponent implements OnInit {
   selectedPeriod: 'weekly' | 'monthly' = 'weekly';
   reports: AuditoriumUsageReport[] = [];
   loading = true;
+  showExportMenu = false;
+
+  @ViewChild('dropdownRef') dropdownRef!: ElementRef;
 
   constructor(private analyticsService: AnalyticsService) {}
+
+  @HostListener('document:click', ['$event'])
+  clickout(event: Event) {
+    if (
+      this.showExportMenu &&
+      this.dropdownRef &&
+      !this.dropdownRef.nativeElement.contains(event.target)
+    ) {
+      this.showExportMenu = false;
+    }
+  }
 
   ngOnInit(): void {
     this.loadReport();
@@ -571,6 +727,7 @@ export class AdminAnalyticsComponent implements OnInit {
       },
     });
   }
+  // ... rest of class logic ...
 
   getTotalEvents(): number {
     return this.reports.reduce((sum, r) => sum + r.eventsHosted, 0);
@@ -595,15 +752,18 @@ export class AdminAnalyticsComponent implements OnInit {
     return Math.max(...this.reports.map((r) => r.eventsHosted));
   }
 
-  exportReport(): void {
-    this.analyticsService.exportReport(this.reports, 'pdf').subscribe({
+  exportReport(format: 'pdf' | 'csv' = 'pdf'): void {
+    this.showExportMenu = false;
+    this.analyticsService.exportAdminReport(this.selectedPeriod, format).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `auditorium-report-${Date.now()}.pdf`;
+        a.download = `auditorium-report-${this.selectedPeriod}-${Date.now()}.${format}`;
         a.click();
+        window.URL.revokeObjectURL(url);
       },
+      error: (err) => console.error('Export failed', err),
     });
   }
 }

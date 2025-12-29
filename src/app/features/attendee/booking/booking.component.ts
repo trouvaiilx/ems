@@ -136,36 +136,22 @@ interface SelectedTicket {
             <div class="card">
               <div class="card-header">
                 <h3>Select Seats</h3>
-                <p>Choose your preferred seats</p>
+                <p>Choose your preferred seats from the venue map</p>
               </div>
-              <div class="seat-selection">
-                @for (selected of selectedTickets; track selected.ticketType.id) {
-                <div class="seat-group">
-                  <h4 class="seat-group-title">
-                    {{ getCategoryName(selected.ticketType.category) }} -
-                    {{ selected.ticketType.section }}
-                  </h4>
-                  <div class="seats-grid">
-                    @for (seat of generateSeats(selected.ticketType.section, selected.quantity);
-                    track seat) {
-                    <button
-                      class="seat-btn"
-                      [class.selected]="isSeatSelected(selected.ticketType.id, seat)"
-                      (click)="toggleSeat(selected.ticketType.id, seat)"
-                    >
-                      <svg class="seat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                        />
-                      </svg>
-                      <span>{{ seat }}</span>
-                    </button>
-                    }
-                  </div>
-                </div>
+              <div class="seat-selection-entry">
+                <button (click)="openOverlay()" class="btn btn-primary btn-lg">
+                  <svg class="icon-map" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 01-.553-.894L15 4m0 13V4m0 0L9 7"
+                    />
+                  </svg>
+                  Open Seat Map
+                </button>
+                @if (getAllSelectedSeatsCount() > 0) {
+                <p class="selection-hint">{{ getAllSelectedSeatsCount() }} seats selected</p>
                 }
               </div>
             </div>
@@ -309,6 +295,104 @@ interface SelectedTicket {
         </div>
         }
       </div>
+
+      <!-- SEAT OVERLAY -->
+      @if (showOverlay) {
+      <div class="seat-overlay-backdrop">
+        <div class="seat-overlay-container">
+          <div class="overlay-header">
+            <h2>Select Seats</h2>
+            <div class="overlay-controls">
+              <div class="zoom-controls">
+                <button (click)="zoomOut()" class="btn-icon">-</button>
+                <span>{{ Math.round(zoomLevel * 100) }}%</span>
+                <button (click)="zoomIn()" class="btn-icon">+</button>
+              </div>
+              <button (click)="closeOverlay()" class="btn btn-primary">Done</button>
+            </div>
+          </div>
+
+          <div
+            class="viewport"
+            #viewport
+            (wheel)="onWheel($event)"
+            (mousedown)="onMouseDown($event)"
+            (mousemove)="onMouseMove($event)"
+            (mouseup)="onMouseUp()"
+            (mouseleave)="onMouseUp()"
+          >
+            <div
+              class="venue-map"
+              [style.transform]="transformStyle"
+              [style.transform-origin]="'center top'"
+            >
+              <!-- STAGE -->
+              <div class="stage">STAGE</div>
+
+              <!-- STALL (75 Seats) -->
+              <div class="section-container stall">
+                <h3>Stall (Ground Floor)</h3>
+                <div class="seats-grid stall-grid">
+                  @for (seat of stallSeats; track seat) {
+                  <button
+                    class="seat-btn"
+                    [class.selected]="isSeatSelectedGlobal(seat)"
+                    [class.booked]="isSeatBooked(seat)"
+                    [class.disabled]="isSeatDisabled(seat)"
+                    [disabled]="isSeatBooked(seat) || isSeatDisabled(seat)"
+                    (click)="toggleSeatGlobal(seat)"
+                    [title]="getSeatTooltip(seat)"
+                  >
+                    {{ seat }}
+                  </button>
+                  }
+                </div>
+              </div>
+
+              <!-- MEZZANINE (50 Seats) -->
+              <div class="section-container mezzanine">
+                <h3>Mezzanine (1st Floor)</h3>
+                <div class="seats-grid mezzanine-grid">
+                  @for (seat of mezzanineSeats; track seat) {
+                  <button
+                    class="seat-btn"
+                    [class.selected]="isSeatSelectedGlobal(seat)"
+                    [class.booked]="isSeatBooked(seat)"
+                    [class.disabled]="isSeatDisabled(seat)"
+                    [disabled]="isSeatBooked(seat) || isSeatDisabled(seat)"
+                    (click)="toggleSeatGlobal(seat)"
+                    [title]="getSeatTooltip(seat)"
+                  >
+                    {{ seat }}
+                  </button>
+                  }
+                </div>
+              </div>
+
+              <!-- BALCONY (25 Seats) -->
+              <div class="section-container balcony">
+                <h3>Balcony (2nd Floor)</h3>
+                <div class="seats-grid balcony-grid">
+                  @for (seat of balconySeats; track seat) {
+                  <button
+                    class="seat-btn"
+                    [class.selected]="isSeatSelectedGlobal(seat)"
+                    [class.booked]="isSeatBooked(seat)"
+                    [class.disabled]="isSeatDisabled(seat)"
+                    [disabled]="isSeatBooked(seat) || isSeatDisabled(seat)"
+                    (click)="toggleSeatGlobal(seat)"
+                    [title]="getSeatTooltip(seat)"
+                  >
+                    {{ seat }}
+                  </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
     </div>
   `,
   styles: [
@@ -615,9 +699,17 @@ interface SelectedTicket {
       }
 
       .seat-btn:hover {
-        border-color: var(--accent-500);
         background: var(--accent-300);
         color: var(--accent-900);
+      }
+
+      .seat-btn:disabled,
+      .seat-btn.booked {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: var(--neutral-200);
+        border-color: var(--neutral-300);
+        color: var(--neutral-500);
       }
 
       .seat-btn.selected {
@@ -854,23 +946,203 @@ interface SelectedTicket {
         flex-shrink: 0;
       }
 
-      @media (max-width: 968px) {
-        .booking-grid {
-          grid-template-columns: 1fr;
-        }
+      /* Overlay Styles */
+      .seat-overlay-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
 
-        .summary-card {
-          position: static;
-        }
+      .seat-overlay-container {
+        width: 100%;
+        max-width: 1000px;
+        height: 90vh;
+        background: var(--neutral-white);
+        border-radius: var(--radius-xl);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
 
-        .seats-grid {
-          grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-        }
+      .overlay-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--primary-200);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        z-index: 10;
+      }
+
+      .overlay-controls {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+      }
+
+      .zoom-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--primary-100);
+        padding: 0.25rem;
+        border-radius: 0.5rem;
+      }
+
+      .viewport {
+        flex: 1;
+        overflow: hidden;
+        padding: 4rem;
+        background: #f3f4f6;
+        display: flex;
+        justify-content: center;
+        cursor: grab;
+      }
+
+      .viewport:active {
+        cursor: grabbing;
+      }
+
+      .venue-map {
+        width: 800px; /* Fixed base width */
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+        align-items: center;
+        transition: transform 0.1s linear; /* Faster transition for drag */
+      }
+
+      .stage {
+        width: 60%;
+        height: 80px;
+        background: var(--primary-900);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        letter-spacing: 2px;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .section-container {
+        width: 100%;
+        background: white;
+        padding: 2rem;
+        border-radius: 2rem;
+        border: 2px solid var(--primary-100);
+        position: relative;
+      }
+
+      .section-container h3 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: var(--primary-500);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+      }
+
+      .stall {
+        border-color: #3b82f6;
+      }
+      .mezzanine {
+        border-color: #8b5cf6;
+        width: 85%;
+      }
+      .balcony {
+        border-color: #ec4899;
+        width: 70%;
+      }
+
+      .stall h3 {
+        color: #3b82f6;
+      }
+      .mezzanine h3 {
+        color: #8b5cf6;
+      }
+      .balcony h3 {
+        color: #ec4899;
+      }
+
+      .seats-grid {
+        display: grid;
+        gap: 0.5rem;
+        justify-content: center;
+        justify-items: center;
+      }
+
+      .stall-grid {
+        grid-template-columns: repeat(15, 1fr);
+      }
+      .mezzanine-grid {
+        grid-template-columns: repeat(10, 1fr);
+      }
+      .balcony-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .seat-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px; /* Squircle */
+        border: none;
+        background: var(--primary-200);
+        color: var(--primary-700);
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .seat-btn:hover:not(:disabled) {
+        transform: scale(1.2);
+        z-index: 2;
+      }
+
+      .seat-btn.selected {
+        background: var(--accent-600);
+        color: white;
+        box-shadow: 0 0 10px var(--accent-300);
+      }
+
+      .seat-btn.disabled {
+        opacity: 0.3;
+        background: var(--neutral-300);
+        cursor: not-allowed;
+      }
+
+      .seat-selection-entry {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 2rem;
+      }
+
+      .btn-lg {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+      }
+
+      .icon-map {
+        width: 1.5rem;
+        height: 1.5rem;
       }
     `,
   ],
 })
 export class BookingComponent implements OnInit {
+  Math = Math;
   event: Event | undefined;
   tickets: TicketType[] = [];
   selectedTickets: SelectedTicket[] = [];
@@ -882,6 +1154,25 @@ export class BookingComponent implements OnInit {
   loading = true;
   validatingPromo = false;
   processing = false;
+  bookedSeats: string[] = [];
+
+  // Overlay State
+  showOverlay = false;
+  zoomLevel = 1;
+  panX = 0;
+  panY = 0;
+  isDragging = false;
+  lastClientX = 0;
+  lastClientY = 0;
+
+  get transformStyle(): string {
+    return `scale(${this.zoomLevel}) translate(${this.panX}px, ${this.panY}px)`;
+  }
+
+  // Global Venue Config
+  stallSeats: string[] = [];
+  mezzanineSeats: string[] = [];
+  balconySeats: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -897,7 +1188,19 @@ export class BookingComponent implements OnInit {
     if (eventId) {
       this.loadEvent(eventId);
       this.loadTickets(eventId);
+      this.generateAllSeats();
     }
+  }
+
+  generateAllSeats(): void {
+    // Stall: 75 seats (S1-S75)
+    this.stallSeats = Array.from({ length: 75 }, (_, i) => `S${i + 1}`);
+
+    // Mezzanine: 50 seats (M1-M50)
+    this.mezzanineSeats = Array.from({ length: 50 }, (_, i) => `M${i + 1}`);
+
+    // Balcony: 25 seats (B1-B25)
+    this.balconySeats = Array.from({ length: 25 }, (_, i) => `B${i + 1}`);
   }
 
   loadEvent(id: string): void {
@@ -913,6 +1216,14 @@ export class BookingComponent implements OnInit {
     this.ticketService.getTicketsByEvent(eventId).subscribe({
       next: (tickets) => {
         this.tickets = tickets.filter((t) => t.availableTickets > 0);
+      },
+    });
+  }
+
+  loadBookedSeats(eventId: string): void {
+    this.bookingService.getBookedSeats(eventId).subscribe({
+      next: (seats) => {
+        this.bookedSeats = seats;
       },
     });
   }
@@ -956,27 +1267,145 @@ export class BookingComponent implements OnInit {
     return this.selectedTickets.reduce((sum, s) => sum + s.quantity, 0);
   }
 
-  generateSeats(section: SeatingSection, count: number): string[] {
-    const prefix =
-      section === SeatingSection.BALCONY ? 'B' : section === SeatingSection.MEZZANINE ? 'M' : 'S';
-    return Array.from({ length: 20 }, (_, i) => `${prefix}${i + 1}`);
+  isSeatBooked(seat: string): boolean {
+    return this.bookedSeats.includes(seat);
   }
 
-  isSeatSelected(ticketTypeId: string, seat: string): boolean {
-    const selected = this.selectedTickets.find((s) => s.ticketType.id === ticketTypeId);
-    return selected ? selected.seatNumbers.includes(seat) : false;
+  openOverlay(): void {
+    if (this.selectedTickets.length === 0) {
+      alert('Please select at least one ticket first.');
+      return;
+    }
+    this.showOverlay = true;
+    this.zoomLevel = 1;
+    this.panX = 0;
+    this.panY = 0;
   }
 
-  toggleSeat(ticketTypeId: string, seat: string): void {
-    const selected = this.selectedTickets.find((s) => s.ticketType.id === ticketTypeId);
-    if (selected) {
-      const index = selected.seatNumbers.indexOf(seat);
-      if (index !== -1) {
-        selected.seatNumbers.splice(index, 1);
-      } else if (selected.seatNumbers.length < selected.quantity) {
-        selected.seatNumbers.push(seat);
+  closeOverlay(): void {
+    this.showOverlay = false;
+  }
+
+  zoomIn(): void {
+    if (this.zoomLevel < 3) this.zoomLevel += 0.2;
+  }
+
+  zoomOut(): void {
+    if (this.zoomLevel > 0.6) this.zoomLevel -= 0.2;
+  }
+
+  onWheel(event: WheelEvent): void {
+    event.preventDefault();
+    const zoomSensitivity = 0.001;
+    const newZoom = this.zoomLevel - event.deltaY * zoomSensitivity;
+    this.zoomLevel = Math.max(0.5, Math.min(newZoom, 3));
+  }
+
+  onMouseDown(event: MouseEvent): void {
+    this.isDragging = true;
+    this.lastClientX = event.clientX;
+    this.lastClientY = event.clientY;
+    event.preventDefault();
+  }
+
+  onMouseMove(event: MouseEvent): void {
+    if (!this.isDragging) return;
+    event.preventDefault();
+    const deltaX = event.clientX - this.lastClientX;
+    const deltaY = event.clientY - this.lastClientY;
+
+    this.panX += deltaX / this.zoomLevel;
+    this.panY += deltaY / this.zoomLevel;
+
+    this.lastClientX = event.clientX;
+    this.lastClientY = event.clientY;
+  }
+
+  onMouseUp(): void {
+    this.isDragging = false;
+  }
+
+  isSeatDisabled(seat: string): boolean {
+    // Find which ticket type corresponds to this seat's section
+    // S -> Stall, M -> Mezzanine, B -> Balcony
+    let requiredSection: SeatingSection;
+    if (seat.startsWith('S')) requiredSection = SeatingSection.STALL;
+    else if (seat.startsWith('M')) requiredSection = SeatingSection.MEZZANINE;
+    else requiredSection = SeatingSection.BALCONY;
+
+    // Check if user has selected a ticket for this section
+    // If ANY of the selected ticket types matches this section, enable it?
+    // OR, more strictly: user is clicking a seat, which bucket does it go to?
+    // The previous logic was "bucket first". This is "seat first".
+    // If I click S5, I need to have a selected ticket of type STALL that needs seats.
+    // AND that ticket type must have remaining quantity to select.
+
+    // Get all selected ticket types that match this section
+    const matchingTypes = this.selectedTickets.filter(
+      (s) => s.ticketType.section === requiredSection
+    );
+
+    if (matchingTypes.length === 0) return true; // Grey out if no ticket for this section
+
+    return false;
+  }
+
+  getSeatTooltip(seat: string): string {
+    if (this.isSeatBooked(seat)) return 'Booked';
+    if (this.isSeatDisabled(seat)) return 'Ticket not selected for this section';
+    return seat;
+  }
+
+  toggleSeatGlobal(seat: string): void {
+    if (this.isSeatBooked(seat)) return;
+
+    // Determine section
+    let requiredSection: SeatingSection;
+    if (seat.startsWith('S')) requiredSection = SeatingSection.STALL;
+    else if (seat.startsWith('M')) requiredSection = SeatingSection.MEZZANINE;
+    else requiredSection = SeatingSection.BALCONY;
+
+    // Check if already selected by any ticket
+    let owningTicket = this.selectedTickets.find((s) => s.seatNumbers.includes(seat));
+
+    if (owningTicket) {
+      // DESELECT
+      const idx = owningTicket.seatNumbers.indexOf(seat);
+      owningTicket.seatNumbers.splice(idx, 1);
+    } else {
+      // SELECT
+      // Find a ticket of this section that has room
+      const eligibleTicket = this.selectedTickets.find(
+        (s) => s.ticketType.section === requiredSection && s.seatNumbers.length < s.quantity
+      );
+
+      if (eligibleTicket) {
+        eligibleTicket.seatNumbers.push(seat);
+      } else {
+        // Find a ticket of this section that is full?
+        // Maybe warn or auto-select not possible if fully allocated.
+        // If all matching tickets are full, maybe check if we can add quantity?
+        // For now, simpler: if no room, ignore click or show msg?
+        const hasTicket = this.selectedTickets.some(
+          (s) => s.ticketType.section === requiredSection
+        );
+        if (hasTicket) {
+          alert(
+            'You have already selected all seats for this ticket type. Increase quantity to select more.'
+          );
+        } else {
+          alert('You have not selected a ticket for this section.');
+        }
       }
     }
+  }
+
+  isSeatSelectedGlobal(seat: string): boolean {
+    return this.selectedTickets.some((s) => s.seatNumbers.includes(seat));
+  }
+
+  getAllSelectedSeatsCount(): number {
+    return this.selectedTickets.reduce((sum, s) => sum + s.seatNumbers.length, 0);
   }
 
   allSeatsSelected(): boolean {

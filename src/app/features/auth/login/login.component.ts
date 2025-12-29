@@ -96,6 +96,10 @@ import { LoginCredentials, UserRole } from '../../../core/models/user.model';
             </button>
           </form>
 
+          <div class="auth-footer">
+            <p>Don't have an account? <a routerLink="/register">Register here</a></p>
+          </div>
+
           <div class="demo-section">
             <div class="demo-header">
               <svg class="demo-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -110,16 +114,16 @@ import { LoginCredentials, UserRole } from '../../../core/models/user.model';
             <div class="demo-list">
               <div class="demo-item">
                 <span class="demo-label">Administrator</span>
-                <code class="demo-code">admin / password</code>
+                <code class="demo-code">admin / admin123</code>
               </div>
-              <div class="demo-item">
+              <!-- <div class="demo-item">
                 <span class="demo-label">Organizer</span>
                 <code class="demo-code">organizer1 / password</code>
               </div>
               <div class="demo-item">
                 <span class="demo-label">Attendee</span>
                 <code class="demo-code">attendee1 / password</code>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -324,6 +328,23 @@ import { LoginCredentials, UserRole } from '../../../core/models/user.model';
         background: var(--primary-100);
         padding: 0.25rem 0.5rem;
         border-radius: var(--radius-sm);
+      }
+
+      .auth-footer {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: var(--primary-600);
+        font-size: 0.875rem;
+      }
+
+      .auth-footer a {
+        color: var(--accent-600);
+        font-weight: 500;
+        text-decoration: none;
+      }
+
+      .auth-footer a:hover {
+        text-decoration: underline;
       }
 
       @media (max-width: 480px) {

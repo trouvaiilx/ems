@@ -1,117 +1,157 @@
-// src/app/core/services/event.service.ts
+// src/app/core/services/event.service.ts - BACKEND INTEGRATED
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { Event, EventStatus, CreateEventRequest } from '../models/event.model';
+import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EventService {
-  private eventsSubject = new BehaviorSubject<Event[]>([]);
-  public events$ = this.eventsSubject.asObservable();
+  private apiUrl = `${environment.apiUrl}/events`;
 
-  private mockEvents: Event[] = [
-    {
-      id: '1',
-      name: 'Annual Tech Conference 2025',
-      description: 'Join us for the biggest tech conference of the year featuring keynote speakers from leading tech companies.',
-      date: new Date('2025-12-15'),
-      time: '09:00 AM',
-      posterUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800',
-      organizerId: '2',
-      organizerName: 'Event Co.',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      status: EventStatus.PUBLISHED
-    },
-    {
-      id: '2',
-      name: 'Classical Music Evening',
-      description: 'An enchanting evening of classical music performed by renowned orchestra.',
-      date: new Date('2025-12-25'),
-      time: '07:30 PM',
-      posterUrl: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=800',
-      organizerId: '2',
-      organizerName: 'Event Co.',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      status: EventStatus.PUBLISHED
-    }
-  ];
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
-  constructor() {
-    this.eventsSubject.next(this.mockEvents);
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
   }
 
-  getAllEvents(): Observable<Event[]> {
-    return this.events$.pipe(delay(300));
+  private mapEventFromResponse(data: any): Event {
+    return {
+      id: data._id,
+      name: data.name,
+      description: data.description,
+      date: new Date(data.date),
+      time: data.time,
+      posterUrl: data.posterUrl,
+      organizerId: data.organizerId,
+      organizerName: data.organizerName,
+      createdAt: new Date(data.createdAt),
+      updatedAt: new Date(data.updatedAt),
+      status: data.status as EventStatus,
+    };
+  }
+
+  getAllEvents(filters?: {
+    keyword?: string;
+    category?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Observable<Event[]> {
+    let params: any = {};
+    if (filters) {
+      if (filters.keyword) params.keyword = filters.keyword;
+      if (filters.category) params.category = filters.category;
+      if (filters.startDate) params.startDate = filters.startDate;
+      if (filters.endDate) params.endDate = filters.endDate;
+    }
+
+    return this.http.get<any[]>(this.apiUrl, { params }).pipe(
+      map((events) => events.map((e) => this.mapEventFromResponse(e))),
+      catchError((error) => {
+        console.error('Get events error:', error);
+        return throwError(() => new Error('Failed to fetch events'));
+      })
+    );
   }
 
   getEventById(id: string): Observable<Event | undefined> {
-    return this.events$.pipe(
-      delay(300),
-      map(events => events.find(e => e.id === id))
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+      map((event) => this.mapEventFromResponse(event)),
+      catchError((error) => {
+        console.error('Get event error:', error);
+        return throwError(() => new Error('Failed to fetch event'));
+      })
     );
   }
 
   getEventsByOrganizer(organizerId: string): Observable<Event[]> {
-    return this.events$.pipe(
-      delay(300),
-      map(events => events.filter(e => e.organizerId === organizerId))
+    return this.getAllEvents().pipe(
+      map((events) => events.filter((e) => e.organizerId === organizerId))
     );
   }
 
   getUpcomingEvents(): Observable<Event[]> {
-    return this.events$.pipe(
-      delay(300),
-      map(events => events.filter(e => 
-        e.status === EventStatus.PUBLISHED && 
-        new Date(e.date) >= new Date()
-      ))
+    return this.getAllEvents().pipe(
+      map((events) =>
+        events.filter((e) => e.status === EventStatus.PUBLISHED && new Date(e.date) >= new Date())
+      )
     );
   }
 
-  createEvent(request: CreateEventRequest, organizerId: string, organizerName: string): Observable<Event> {
-    const newEvent: Event = {
-      id: Date.now().toString(),
-      ...request,
-      organizerId,
-      organizerName,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      status: EventStatus.DRAFT
-    };
+  createEvent(
+    request: CreateEventRequest | FormData,
+    organizerId: string,
+    organizerName: string
+  ): Observable<Event> {
+    let payload: any;
+    let headers = this.getAuthHeaders();
 
-    return of(newEvent).pipe(
-      delay(500),
-      map(event => {
-        const currentEvents = this.eventsSubject.value;
-        this.eventsSubject.next([...currentEvents, event]);
-        return event;
+    if (request instanceof FormData) {
+      payload = request;
+      payload.append('organizerName', organizerName);
+      // Remove Content-Type to let browser set boundary
+      headers = headers.delete('Content-Type');
+    } else {
+      payload = {
+        name: request.name,
+        description: request.description,
+        date: request.date.toISOString(),
+        time: request.time,
+        posterUrl: request.posterUrl || '',
+        organizerName: organizerName,
+      };
+    }
+
+    return this.http
+      .post<any>(this.apiUrl, payload, {
+        headers,
       })
-    );
+      .pipe(
+        map((event) => this.mapEventFromResponse(event)),
+        catchError((error) => {
+          console.error('Create event error:', error);
+          return throwError(() => new Error(error.error?.message || 'Failed to create event'));
+        })
+      );
   }
 
-  updateEvent(id: string, updates: Partial<Event>): Observable<Event> {
-    return of(updates).pipe(
-      delay(500),
-      map(() => {
-        const currentEvents = this.eventsSubject.value;
-        const index = currentEvents.findIndex(e => e.id === id);
-        if (index !== -1) {
-          currentEvents[index] = {
-            ...currentEvents[index],
-            ...updates,
-            updatedAt: new Date()
-          };
-          this.eventsSubject.next([...currentEvents]);
-          return currentEvents[index];
-        }
-        throw new Error('Event not found');
+  updateEvent(id: string, updates: Partial<Event> | FormData): Observable<Event> {
+    let payload: any;
+    let headers = this.getAuthHeaders();
+
+    if (updates instanceof FormData) {
+      payload = updates;
+      headers = headers.delete('Content-Type');
+    } else {
+      payload = {};
+      if (updates.name) payload.name = updates.name;
+      if (updates.description) payload.description = updates.description;
+      if (updates.date) payload.date = new Date(updates.date).toISOString();
+      if (updates.time) payload.time = updates.time;
+      if (updates.posterUrl !== undefined) payload.posterUrl = updates.posterUrl;
+      if (updates.status) payload.status = updates.status;
+    }
+
+    return this.http
+      .put<any>(`${this.apiUrl}/${id}`, payload, {
+        headers,
       })
-    );
+      .pipe(
+        map((event) => this.mapEventFromResponse(event)),
+        catchError((error) => {
+          console.error('Update event error:', error);
+          return throwError(() => new Error(error.error?.message || 'Failed to update event'));
+        })
+      );
   }
 
   publishEvent(id: string): Observable<Event> {
@@ -122,15 +162,28 @@ export class EventService {
     return this.updateEvent(id, { status: EventStatus.CANCELLED });
   }
 
+  deleteEvent(id: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.apiUrl}/${id}`, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(
+        catchError((error) => {
+          console.error('Delete event error:', error);
+          return throwError(() => new Error(error.error?.message || 'Failed to delete event'));
+        })
+      );
+  }
+
   isDateAvailable(date: Date, excludeEventId?: string): Observable<boolean> {
-    return this.events$.pipe(
-      delay(300),
-      map(events => {
+    return this.getAllEvents().pipe(
+      map((events) => {
         const dateStr = date.toISOString().split('T')[0];
-        return !events.some(e => 
-          e.id !== excludeEventId &&
-          e.date.toISOString().split('T')[0] === dateStr &&
-          e.status !== EventStatus.CANCELLED
+        return !events.some(
+          (e) =>
+            e.id !== excludeEventId &&
+            new Date(e.date).toISOString().split('T')[0] === dateStr &&
+            e.status !== EventStatus.CANCELLED
         );
       })
     );

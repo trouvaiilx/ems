@@ -4,7 +4,31 @@ const Event = require('../models/Event');
 // @route   GET /api/events
 // @access  Public (or Private depending on req)
 const getEvents = async (req, res) => {
-  const events = await Event.find();
+  const { keyword, category, startDate, endDate } = req.query;
+  let query = { status: 'PUBLISHED' }; // Default to only published events
+
+  if (keyword) {
+    query.$or = [
+      { name: { $regex: keyword, $options: 'i' } },
+      { description: { $regex: keyword, $options: 'i' } },
+    ];
+  }
+
+  if (category) {
+    query.category = category;
+  }
+
+  if (startDate || endDate) {
+    query.date = {};
+    if (startDate) {
+      query.date.$gte = new Date(startDate);
+    }
+    if (endDate) {
+      query.date.$lte = new Date(endDate);
+    }
+  }
+
+  const events = await Event.find(query).sort({ date: 1 });
   res.status(200).json(events);
 };
 
@@ -12,12 +36,12 @@ const getEvents = async (req, res) => {
 // @route   GET /api/events/:id
 // @access  Public
 const getEventById = async (req, res) => {
-    const event = await Event.findById(req.params.id);
-    if(!event) {
-        res.status(404);
-        throw new Error('Event not found');
-    }
-    res.status(200).json(event);
+  const event = await Event.findById(req.params.id);
+  if (!event) {
+    res.status(404);
+    throw new Error('Event not found');
+  }
+  res.status(200).json(event);
 };
 
 // @desc    Create new event
@@ -29,10 +53,22 @@ const createEvent = async (req, res) => {
     throw new Error('Please add all required fields');
   }
 
+  if (req.file) {
+    req.body.posterUrl = `http://${req.headers.host}/uploads/${req.file.filename}`;
+  }
+
   const event = await Event.create({
     ...req.body,
     organizerId: req.user.id,
-    organizerName: req.user.fullName // Assuming user has fullName
+    organizerName: req.user.fullName, // Assuming user has fullName
+  });
+
+  // Log Activity
+  const ActivityLog = require('../models/ActivityLog');
+  await ActivityLog.create({
+    action: 'EVENT_CREATED',
+    targetId: event._id,
+    metadata: { eventName: event.name },
   });
 
   res.status(200).json(event);
@@ -53,6 +89,10 @@ const updateEvent = async (req, res) => {
   if (event.organizerId.toString() !== req.user.id && req.user.role !== 'ADMIN') {
     res.status(401);
     throw new Error('User not authorized');
+  }
+
+  if (req.file) {
+    req.body.posterUrl = `http://${req.headers.host}/uploads/${req.file.filename}`;
   }
 
   const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, {

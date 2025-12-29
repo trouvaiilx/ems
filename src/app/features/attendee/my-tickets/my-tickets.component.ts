@@ -6,6 +6,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Booking, BookingStatus } from '../../../core/models/booking.model';
+import * as QRCode from 'qrcode';
 
 @Component({
   selector: 'app-my-tickets',
@@ -144,14 +145,18 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
             @if (booking.status === 'CONFIRMED' && !booking.checkedIn) {
             <div class="qr-section">
               <div class="qr-code">
+                @if (qrCodes[booking.id]) {
+                <img [src]="qrCodes[booking.id]" alt="QR Code" class="qr-image" />
+                } @else {
                 <div class="qr-placeholder">
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path
                       d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm14 0h2v2h-2v-2zm-2-2h2v2h-2v-2zm2 4h2v2h-2v-2zm-4-4h2v2h-2v-2zm2 2h2v2h-2v-2zm-2 2h2v2h-2v-2z"
                     />
                   </svg>
-                  <p>{{ booking.qrCode }}</p>
+                  <p>Generating...</p>
                 </div>
+                }
               </div>
               <div class="qr-info">
                 <h4>Your Entry Pass</h4>
@@ -490,6 +495,15 @@ import { Booking, BookingStatus } from '../../../core/models/booking.model';
         padding: 1rem;
         border-radius: var(--radius-md);
         border: 2px dashed var(--accent-600);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .qr-image {
+        width: 150px;
+        height: 150px;
+        display: block;
       }
 
       .qr-placeholder {
@@ -733,6 +747,7 @@ export class MyTicketsComponent implements OnInit, OnDestroy {
   loading = true;
   showSuccessMessage = false;
   cancelSuccessMessage = false;
+  qrCodes: { [key: string]: string } = {};
   private successTimeout: any;
   private cancelTimeout: any;
 
@@ -774,8 +789,25 @@ export class MyTicketsComponent implements OnInit, OnDestroy {
       next: (bookings) => {
         this.bookings = bookings;
         this.filterBookings();
+        this.bookings = bookings;
+        this.filterBookings();
+        this.generateQrCodes();
         this.loading = false;
       },
+    });
+  }
+
+  generateQrCodes(): void {
+    this.bookings.forEach((booking) => {
+      if (booking.status === 'CONFIRMED' && !this.qrCodes[booking.id]) {
+        QRCode.toDataURL(booking.qrCode || booking.id, { width: 1080, margin: 2 })
+          .then((url) => {
+            this.qrCodes[booking.id] = url;
+          })
+          .catch((err) => {
+            console.error('QR Gen Error', err);
+          });
+      }
     });
   }
 
@@ -848,6 +880,16 @@ export class MyTicketsComponent implements OnInit, OnDestroy {
   }
 
   downloadTicket(booking: Booking): void {
-    alert('Ticket download feature - QR Code would be generated here');
+    const qrDataUrl = this.qrCodes[booking.id];
+    if (qrDataUrl) {
+      const link = document.createElement('a');
+      link.href = qrDataUrl;
+      link.download = `ticket-qr-${booking.id}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      alert('QR Code not generated yet. Please wait.');
+    }
   }
 }

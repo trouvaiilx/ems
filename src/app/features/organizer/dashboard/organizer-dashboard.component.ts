@@ -3,14 +3,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { EventService } from '../../../core/services/event.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { OrganizerService, OrganizerStats } from '../../../core/services/organizer.service';
 import { Event } from '../../../core/models/event.model';
 
 @Component({
   selector: 'app-organizer-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="dashboard-page">
       <div class="container">
@@ -71,7 +73,7 @@ import { Event } from '../../../core/models/event.model';
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span>+18% this month</span>
+                <span>+{{ stats?.thisMonth?.bookings || 0 }} this month</span>
               </div>
             </div>
             <div class="stat-icon">
@@ -98,7 +100,7 @@ import { Event } from '../../../core/models/event.model';
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span>+24% this month</span>
+                <span>+RM {{ (stats?.thisMonth?.revenue || 0).toLocaleString() }} this month</span>
               </div>
             </div>
             <div class="stat-icon">
@@ -302,6 +304,44 @@ import { Event } from '../../../core/models/event.model';
           </div>
           }
         </div>
+        <!-- Change Password Modal -->
+        @if (showChangePasswordModal) {
+        <div class="modal-overlay">
+          <div class="modal-content">
+            <h2>Change Password Required</h2>
+            <p>For security, please change your temporary password to continue.</p>
+
+            <form (ngSubmit)="onChangePassword()" #pwForm="ngForm">
+              <div class="form-group">
+                <label>Current Password</label>
+                <input
+                  type="password"
+                  [(ngModel)]="passwordData.currentPassword"
+                  name="currentPassword"
+                  required
+                  class="form-control"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>New Password</label>
+                <input
+                  type="password"
+                  [(ngModel)]="passwordData.newPassword"
+                  name="newPassword"
+                  required
+                  minlength="6"
+                  class="form-control"
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary" [disabled]="!pwForm.form.valid">
+                Update Password
+              </button>
+            </form>
+          </div>
+        </div>
+        }
       </div>
     </div>
   `,
@@ -790,6 +830,60 @@ import { Event } from '../../../core/models/event.model';
         font-size: 0.875rem;
       }
 
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+      }
+
+      .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: var(--radius-xl);
+        width: 100%;
+        max-width: 400px;
+        box-shadow: var(--shadow-xl);
+      }
+
+      .modal-content h2 {
+        margin-top: 0;
+        color: var(--primary-900);
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--primary-700);
+        font-weight: 500;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--primary-300);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--accent-500);
+        box-shadow: 0 0 0 3px var(--accent-100);
+      }
+
       @media (max-width: 968px) {
         .dashboard-page {
           padding: 1rem;
@@ -799,7 +893,6 @@ import { Event } from '../../../core/models/event.model';
           flex-direction: column;
           align-items: flex-start;
         }
-
         .page-title {
           font-size: 2rem;
         }
@@ -861,61 +954,82 @@ export class OrganizerDashboardComponent implements OnInit {
   currentUser: any;
   myEvents: Event[] = [];
   filteredEvents: Event[] = [];
-  activeFilter: 'all' | 'upcoming' | 'draft' = 'all';
   loading = true;
-  totalBookings = 135;
-  totalRevenue = 20250;
+  activeFilter: 'all' | 'upcoming' | 'draft' = 'all';
+  stats: OrganizerStats | null = null;
 
-  constructor(private eventService: EventService, private authService: AuthService) {}
+  // Modal State
+  showChangePasswordModal = false;
+  passwordData = {
+    currentPassword: '',
+    newPassword: '',
+  };
+
+  constructor(
+    private eventService: EventService,
+    private authService: AuthService,
+    private organizerService: OrganizerService
+  ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
+
+    // Check for first login
+    if (this.currentUser?.isFirstLogin) {
+      this.showChangePasswordModal = true;
+    }
+
     this.loadMyEvents();
+    this.loadStats();
+  }
+
+  loadStats(): void {
+    this.organizerService.getStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+      },
+      error: (err) => console.error('Failed to load stats', err),
+    });
   }
 
   loadMyEvents(): void {
+    // ... existing load logic
     if (this.currentUser) {
       this.eventService.getEventsByOrganizer(this.currentUser.id).subscribe({
         next: (events) => {
           this.myEvents = events;
-          this.applyFilter();
+          this.setFilter('all');
           this.loading = false;
         },
+        error: () => (this.loading = false),
       });
     }
   }
 
   setFilter(filter: 'all' | 'upcoming' | 'draft'): void {
     this.activeFilter = filter;
-    this.applyFilter();
-  }
+    const now = new Date();
 
-  applyFilter(): void {
-    switch (this.activeFilter) {
-      case 'upcoming':
-        this.filteredEvents = this.myEvents.filter(
-          (e) => e.status === 'PUBLISHED' && new Date(e.date) >= new Date()
-        );
-        break;
-      case 'draft':
-        this.filteredEvents = this.myEvents.filter((e) => e.status === 'DRAFT');
-        break;
-      default:
-        this.filteredEvents = this.myEvents;
+    if (filter === 'all') {
+      this.filteredEvents = this.myEvents;
+    } else if (filter === 'upcoming') {
+      this.filteredEvents = this.myEvents.filter((e) => new Date(e.date) >= now);
+    } else {
+      // emerging pattern for drafts if status exists, otherwise just all else
+      this.filteredEvents = this.myEvents.filter((e) => e.status === 'DRAFT');
     }
   }
 
   getTotalBookings(): number {
-    return this.totalBookings;
+    return this.stats?.totalBookings || 0;
   }
 
   getTotalRevenue(): string {
-    return this.totalRevenue.toLocaleString();
+    return (this.stats?.totalRevenue || 0).toLocaleString();
   }
 
   getUpcomingEvents(): number {
-    return this.myEvents.filter((e) => e.status === 'PUBLISHED' && new Date(e.date) >= new Date())
-      .length;
+    return this.myEvents.filter((e) => new Date(e.date) >= new Date()).length;
   }
 
   getNextEventDate(): string {
@@ -930,5 +1044,26 @@ export class OrganizerDashboardComponent implements OnInit {
       });
     }
     return 'None scheduled';
+  }
+
+  onChangePassword(): void {
+    if (this.passwordData.newPassword.length < 6) {
+      alert('Password must be at least 6 characters long');
+      return;
+    }
+
+    this.authService.changePassword(this.passwordData).subscribe({
+      next: () => {
+        this.showChangePasswordModal = false;
+        // Update local user state
+        if (this.currentUser) {
+          this.currentUser.isFirstLogin = false;
+        }
+        alert('Password changed successfully');
+      },
+      error: (err) => {
+        alert(err.message || 'Failed to change password');
+      },
+    });
   }
 }

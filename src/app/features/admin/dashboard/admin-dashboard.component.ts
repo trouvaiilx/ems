@@ -5,6 +5,9 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { UserService } from '../../../core/services/user.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -25,15 +28,37 @@ import { AuthService } from '../../../core/services/auth.service';
             <div class="stat-content">
               <div class="stat-label">Event Organizers</div>
               <div class="stat-value">{{ totalOrganizers }}</div>
-              <div class="stat-change positive">
-                <svg class="change-icon" viewBox="0 0 20 20" fill="currentColor">
+              <div
+                class="stat-change"
+                [class.positive]="organizerChange >= 0"
+                [class.negative]="organizerChange < 0"
+              >
+                <svg
+                  class="change-icon"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  *ngIf="organizerChange >= 0"
+                >
                   <path
                     fill-rule="evenodd"
                     d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span>+12% from last month</span>
+                <svg
+                  class="change-icon"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  *ngIf="organizerChange < 0"
+                  style="transform: rotate(180deg)"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>{{ organizerChange >= 0 ? '+' : '' }}{{ organizerChange }} this month</span>
               </div>
             </div>
             <div class="stat-icon">
@@ -52,15 +77,37 @@ import { AuthService } from '../../../core/services/auth.service';
             <div class="stat-content">
               <div class="stat-label">Total Events</div>
               <div class="stat-value">{{ totalEvents }}</div>
-              <div class="stat-change positive">
-                <svg class="change-icon" viewBox="0 0 20 20" fill="currentColor">
+              <div
+                class="stat-change"
+                [class.positive]="eventChange >= 0"
+                [class.negative]="eventChange < 0"
+              >
+                <svg
+                  class="change-icon"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  *ngIf="eventChange >= 0"
+                >
                   <path
                     fill-rule="evenodd"
                     d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span>+8% from last month</span>
+                <svg
+                  class="change-icon"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  *ngIf="eventChange < 0"
+                  style="transform: rotate(180deg)"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>{{ eventChange >= 0 ? '+' : '' }}{{ eventChange }} this month</span>
               </div>
             </div>
             <div class="stat-icon">
@@ -79,15 +126,37 @@ import { AuthService } from '../../../core/services/auth.service';
             <div class="stat-content">
               <div class="stat-label">Total Bookings</div>
               <div class="stat-value">{{ totalBookings }}</div>
-              <div class="stat-change positive">
-                <svg class="change-icon" viewBox="0 0 20 20" fill="currentColor">
+              <div
+                class="stat-change"
+                [class.positive]="bookingChange >= 0"
+                [class.negative]="bookingChange < 0"
+              >
+                <svg
+                  class="change-icon"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  *ngIf="bookingChange >= 0"
+                >
                   <path
                     fill-rule="evenodd"
                     d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span>+15% from last month</span>
+                <svg
+                  class="change-icon"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  *ngIf="bookingChange < 0"
+                  style="transform: rotate(180deg)"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>{{ bookingChange >= 0 ? '+' : '' }}{{ bookingChange }} this month</span>
               </div>
             </div>
             <div class="stat-icon">
@@ -106,15 +175,41 @@ import { AuthService } from '../../../core/services/auth.service';
             <div class="stat-content">
               <div class="stat-label">Total Revenue</div>
               <div class="stat-value">RM {{ totalRevenue.toLocaleString() }}</div>
-              <div class="stat-change positive">
-                <svg class="change-icon" viewBox="0 0 20 20" fill="currentColor">
+              <div
+                class="stat-change"
+                [class.positive]="revenueChange >= 0"
+                [class.negative]="revenueChange < 0"
+              >
+                <svg
+                  class="change-icon"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  *ngIf="revenueChange >= 0"
+                >
                   <path
                     fill-rule="evenodd"
                     d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span>+22% from last month</span>
+                <svg
+                  class="change-icon"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  *ngIf="revenueChange < 0"
+                  style="transform: rotate(180deg)"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span
+                  >{{ revenueChange >= 0 ? '+ RM' : '- RM' }}
+                  {{ (revenueChange < 0 ? -revenueChange : revenueChange).toLocaleString() }} this
+                  month</span
+                >
               </div>
             </div>
             <div class="stat-icon">
@@ -279,6 +374,47 @@ import { AuthService } from '../../../core/services/auth.service';
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- NEW: User Management Section -->
+        <div class="card full-width-card">
+          <div class="card-header">
+            <h2>User Management</h2>
+          </div>
+          <div class="card-content">
+            @if (usersLoading) {
+            <div class="loading-state"><p>Loading users...</p></div>
+            } @else {
+            <div class="table-responsive">
+              <table class="user-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (user of users; track user._id) {
+                  <tr>
+                    <td>{{ user.fullName }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                      <span class="badge badge-{{ user.role.toLowerCase() }}">{{ user.role }}</span>
+                    </td>
+                    <td>
+                      @if (user.role !== 'ADMIN') {
+                      <button class="btn-delete" (click)="onDeleteUser(user._id)">Delete</button>
+                      }
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            }
           </div>
         </div>
       </div>
@@ -642,6 +778,69 @@ import { AuthService } from '../../../core/services/auth.service';
         font-size: 0.875rem;
       }
 
+      /* User Management Styles */
+      .full-width-card {
+        margin-top: 2rem;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+      }
+
+      .user-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .user-table th,
+      .user-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .user-table th {
+        font-weight: 600;
+        color: var(--primary-700);
+        background: #f9fafb;
+      }
+
+      .btn-delete {
+        background: var(--error-600);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .btn-delete:hover {
+        background: var(--error-700);
+      }
+
+      .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .badge-admin {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .badge-organizer {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .badge-attendee {
+        background: #f3f4f6;
+        color: #374151;
+      }
+
       @media (max-width: 768px) {
         .dashboard-page {
           padding: 1rem;
@@ -668,18 +867,57 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class AdminDashboardComponent implements OnInit {
   currentUser: any;
-  totalOrganizers = 15;
-  totalEvents = 48;
-  totalBookings = 1247;
-  totalRevenue = 125480;
+  totalOrganizers = 0;
+  totalEvents = 0;
+  totalBookings = 0;
+  totalRevenue = 0;
+
+  // Percent changes (MoM)
+  organizerChange = 0;
+  eventChange = 0;
+  bookingChange = 0;
+  revenueChange = 0;
+
   recentEvents: any[] = [];
+
+  users: any[] = [];
+  usersLoading = true;
   loading = true;
 
-  constructor(private eventService: EventService, private authService: AuthService) {}
+  constructor(
+    private eventService: EventService,
+    private authService: AuthService,
+    private userService: UserService,
+    private http: HttpClient
+  ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
+    this.loadStats();
     this.loadRecentEvents();
+    this.loadUsers();
+  }
+
+  loadStats(): void {
+    this.http.get<any>(`${environment.apiUrl}/admin/stats`).subscribe({
+      next: (stats) => {
+        this.totalOrganizers = stats.totalOrganizers;
+        this.totalEvents = stats.totalEvents;
+        this.totalBookings = stats.totalBookings;
+        this.totalRevenue = stats.totalRevenue;
+
+        // Update MoM changes
+        if (stats.changes) {
+          // Assuming the template has properties for these changes or I need to add them.
+          // Since I can't see the template, I'll add properties to the component class.
+          this.organizerChange = stats.changes.organizers;
+          this.eventChange = stats.changes.events;
+          this.bookingChange = stats.changes.bookings;
+          this.revenueChange = stats.changes.revenue;
+        }
+      },
+      error: (err) => console.error('Failed to load stats', err),
+    });
   }
 
   loadRecentEvents(): void {
@@ -689,5 +927,33 @@ export class AdminDashboardComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  loadUsers(): void {
+    this.userService.getAllUsers().subscribe({
+      next: (data) => {
+        this.users = data;
+        this.usersLoading = false;
+        // Recalculate stats based on real data if desirable, or leave dummy for now
+        this.totalOrganizers = this.users.filter((u) => u.role === 'ORGANIZER').length;
+      },
+      error: (err) => {
+        console.error('Failed to load users', err);
+        this.usersLoading = false;
+      },
+    });
+  }
+
+  onDeleteUser(userId: string): void {
+    if (confirm('Are you sure you want to delete this user?')) {
+      this.userService.deleteUser(userId).subscribe({
+        next: () => {
+          this.users = this.users.filter((u) => u._id !== userId);
+          alert('User deleted successfully');
+          this.totalOrganizers = this.users.filter((u) => u.role === 'ORGANIZER').length;
+        },
+        error: (err) => alert('Failed to delete user'),
+      });
+    }
   }
 }

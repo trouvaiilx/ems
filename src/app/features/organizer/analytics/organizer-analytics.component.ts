@@ -1,6 +1,6 @@
 // src/app/features/organizer/analytics/organizer-analytics.component.ts
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
@@ -33,24 +33,62 @@ import {
               }
             </select>
           </div>
-          <div class="filter-group">
-            <label>Period</label>
-            <select [(ngModel)]="selectedPeriod" (ngModelChange)="loadAnalytics()">
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
+
+          <div class="export-dropdown" #dropdownRef>
+            <button
+              class="btn btn-primary dropdown-trigger"
+              (click)="showExportMenu = !showExportMenu"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+              Export Report
+              <svg
+                class="chevron"
+                [class.rotated]="showExportMenu"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
+            @if (showExportMenu) {
+            <div class="dropdown-menu">
+              <button (click)="exportReport('csv')" class="dropdown-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                Export as CSV
+              </button>
+              <button (click)="exportReport('pdf')" class="dropdown-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
+                </svg>
+                Export as PDF
+              </button>
+            </div>
+            }
           </div>
-          <button (click)="exportReport()" class="btn btn-primary">
-            <svg viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fill-rule="evenodd"
-                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            Export
-          </button>
         </div>
 
         @if (loading) {
@@ -74,16 +112,6 @@ import {
             <div class="metric-content">
               <h3>{{ getTotalTicketsSold() }}</h3>
               <p>Tickets Sold</p>
-              <span class="metric-change positive">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    fill-rule="evenodd"
-                    d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                +12%
-              </span>
             </div>
           </div>
 
@@ -101,16 +129,6 @@ import {
             <div class="metric-content">
               <h3>RM {{ getTotalRevenue() }}</h3>
               <p>Revenue</p>
-              <span class="metric-change positive">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    fill-rule="evenodd"
-                    d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                +8%
-              </span>
             </div>
           </div>
 
@@ -128,16 +146,6 @@ import {
             <div class="metric-content">
               <h3>{{ getAverageOccupancy() }}%</h3>
               <p>Avg Occupancy</p>
-              <span class="metric-change negative">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    fill-rule="evenodd"
-                    d="M12 13a1 1 0 100 2h5a1 1 0 001-1V9a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                -3%
-              </span>
             </div>
           </div>
 
@@ -309,6 +317,87 @@ import {
         outline: none;
         border-color: var(--accent-500);
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      /* Dropdown Styles */
+      .export-dropdown {
+        position: relative;
+      }
+
+      .dropdown-trigger {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 160px;
+        justify-content: space-between;
+      }
+
+      .chevron {
+        width: 1.25rem;
+        height: 1.25rem;
+        transition: transform var(--transition-base);
+      }
+
+      .chevron.rotated {
+        transform: rotate(180deg);
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background: var(--neutral-white);
+        border: 1px solid var(--primary-200);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        min-width: 200px;
+        z-index: 50;
+        padding: 0.5rem;
+        animation: slideDown 0.2s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: none;
+        color: var(--primary-700);
+        font-weight: 500;
+        font-size: 0.875rem;
+        cursor: pointer;
+        border-radius: var(--radius-sm);
+        transition: all var(--transition-fast);
+        text-align: left;
+      }
+
+      .dropdown-item:hover {
+        background: var(--primary-50);
+        color: var(--accent-600);
+      }
+
+      .dropdown-item svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--primary-400);
+      }
+
+      .dropdown-item:hover svg {
+        color: var(--accent-600);
       }
 
       .btn {
@@ -618,10 +707,12 @@ import {
 export class OrganizerAnalyticsComponent implements OnInit {
   myEvents: any[] = [];
   selectedEventId = '';
-  selectedPeriod: 'daily' | 'weekly' | 'monthly' = 'daily';
   salesReports: SalesReport[] = [];
   occupancyReports: OccupancyReport[] = [];
   loading = true;
+  showExportMenu = false;
+
+  @ViewChild('dropdownRef') dropdownRef!: ElementRef;
 
   constructor(
     private authService: AuthService,
@@ -644,24 +735,40 @@ export class OrganizerAnalyticsComponent implements OnInit {
     }
   }
 
+  @HostListener('document:click', ['$event'])
+  clickout(event: Event) {
+    if (
+      this.showExportMenu &&
+      this.dropdownRef &&
+      !this.dropdownRef.nativeElement.contains(event.target)
+    ) {
+      this.showExportMenu = false;
+    }
+  }
+
   loadAnalytics(): void {
     if (!this.selectedEventId) return;
 
     this.loading = true;
 
-    this.analyticsService.getSalesReport(this.selectedEventId, this.selectedPeriod).subscribe({
+    // Defaulting to monthly for internal graph data if backend asks
+    this.analyticsService.getSalesReport(this.selectedEventId, 'monthly').subscribe({
       next: (data) => {
         this.salesReports = data;
       },
     });
 
-    this.analyticsService.getOccupancyReport(this.selectedEventId, this.selectedPeriod).subscribe({
+    this.analyticsService.getOccupancyReport(this.selectedEventId, 'monthly').subscribe({
       next: (data) => {
         this.occupancyReports = data;
         this.loading = false;
       },
     });
   }
+  // ... getters stay ...
+
+  // Need to fix where the previous replace ended to match context properly or I can replace the whole class.
+  // replacing up to exportReport
 
   getTotalTicketsSold(): number {
     return this.salesReports.reduce((sum, r) => sum + r.ticketsSold, 0);
@@ -692,13 +799,14 @@ export class OrganizerAnalyticsComponent implements OnInit {
     return report ? report.occupancyRate : 0;
   }
 
-  exportReport(): void {
-    this.analyticsService.exportReport(this.salesReports, 'pdf').subscribe({
+  exportReport(format: 'pdf' | 'csv'): void {
+    this.showExportMenu = false;
+    this.analyticsService.exportReport(format).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `event-analytics-${Date.now()}.pdf`;
+        a.download = `event-analytics-${Date.now()}.${format}`;
         a.click();
       },
     });
