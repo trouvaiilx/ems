@@ -430,8 +430,8 @@ import { User, UserRole } from '../../../core/models/user.model';
         left: 0;
         right: 0;
         bottom: 0;
-        background: var(--neutral-white);
-        z-index: 999;
+        background-color: #ffffff; /* Force white background */
+        z-index: 2000; /* Increase z-index to ensure it covers content */
         padding: 1rem;
         display: flex;
         flex-direction: column;

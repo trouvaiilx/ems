@@ -272,7 +272,7 @@ interface TicketTypeForm {
 
         .ticket-item {
           flex-direction: column;
-          align-items: stretch;
+          align-items: center; /* Center items instead of stretching */
           gap: 1rem;
         }
 

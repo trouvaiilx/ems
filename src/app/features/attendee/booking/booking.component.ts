@@ -625,8 +625,8 @@ interface SelectedTicket {
       }
 
       .qty-btn {
-        width: 2.5rem;
-        height: 2.5rem;
+        width: 3rem;
+        height: 3rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -636,6 +636,12 @@ interface SelectedTicket {
         border-radius: var(--radius-md);
         cursor: pointer;
         transition: all var(--transition-fast);
+        font-size: 1.25rem;
+      }
+
+      .qty-btn:active {
+        background: var(--accent-100);
+        transform: scale(0.95);
       }
 
       .qty-btn:hover:not(:disabled) {
