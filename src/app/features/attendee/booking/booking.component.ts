@@ -320,6 +320,9 @@ interface SelectedTicket {
             (mousemove)="onMouseMove($event)"
             (mouseup)="onMouseUp()"
             (mouseleave)="onMouseUp()"
+            (touchstart)="onTouchStart($event)"
+            (touchmove)="onTouchMove($event)"
+            (touchend)="onTouchEnd()"
           >
             <div
               class="venue-map"
@@ -640,9 +643,34 @@ interface SelectedTicket {
         color: var(--neutral-white);
       }
 
-      .qty-btn:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
+      @media (max-width: 968px) {
+        .booking-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          order: 2; /* Ensure sidebar comes after main content if needed, though naturally it does */
+        }
+
+        /* Seat map mobile adjustments */
+        .seat-overlay-container {
+          width: 100%;
+          height: 100%;
+          border-radius: 0;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .overlay-header {
+          position: sticky;
+          top: 0;
+          z-index: 10;
+          background: var(--neutral-white);
+        }
+
+        .viewport {
+          flex: 1;
+        }
       }
 
       .qty-btn svg {
@@ -1322,6 +1350,32 @@ export class BookingComponent implements OnInit {
   }
 
   onMouseUp(): void {
+    this.isDragging = false;
+  }
+
+  onTouchStart(event: TouchEvent): void {
+    if (event.touches.length === 1) {
+      this.isDragging = true;
+      this.lastClientX = event.touches[0].clientX;
+      this.lastClientY = event.touches[0].clientY;
+    }
+  }
+
+  onTouchMove(event: TouchEvent): void {
+    if (!this.isDragging || event.touches.length !== 1) return;
+    event.preventDefault();
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - this.lastClientX;
+    const deltaY = touch.clientY - this.lastClientY;
+
+    this.panX += deltaX / this.zoomLevel;
+    this.panY += deltaY / this.zoomLevel;
+
+    this.lastClientX = touch.clientX;
+    this.lastClientY = touch.clientY;
+  }
+
+  onTouchEnd(): void {
     this.isDragging = false;
   }
 

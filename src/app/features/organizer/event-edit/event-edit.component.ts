@@ -238,6 +238,7 @@ import { Event } from '../../../core/models/event.model';
       .status-options {
         display: flex;
         gap: 1.5rem;
+        flex-wrap: wrap; /* Allow wrapping on mobile */
       }
 
       .radio-option {
@@ -401,17 +402,27 @@ import { Event } from '../../../core/models/event.model';
         }
 
         .form-actions {
-          flex-direction: column;
-          gap: 1rem;
+          flex-direction: column-reverse; /* Put cancel/save on top visually or bottom logically? Let's keep existing column which puts delete at top... wait. */
+          /* Existing was column which makes Delete (first child) top, and right-actions (second child) bottom. */
+          /* Better to have Save options at top or bottom? Usually bottom. */
+          gap: 1.5rem;
         }
 
         .right-actions {
           width: 100%;
-          justify-content: flex-end;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem; /* Space between Cancel and Save */
+        }
+
+        .right-actions .btn {
+          width: 100%;
+          justify-content: center;
         }
 
         .btn-danger {
           width: 100%;
+          justify-content: center;
         }
       }
     `,

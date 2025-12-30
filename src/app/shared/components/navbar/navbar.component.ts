@@ -27,7 +27,8 @@ import { User, UserRole } from '../../../core/models/user.model';
           </a>
         </div>
 
-        <div class="navbar-menu">
+        <!-- Desktop Menu -->
+        <div class="navbar-menu desktop-only">
           <a routerLink="/home" routerLinkActive="active" class="nav-link">Home</a>
           <a routerLink="/events" routerLinkActive="active" class="nav-link">Events</a>
 
@@ -42,7 +43,28 @@ import { User, UserRole } from '../../../core/models/user.model';
           } }
         </div>
 
-        <div class="navbar-actions">
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" aria-label="Toggle menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            @if (isMobileMenuOpen) {
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+            } @else {
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+            }
+          </svg>
+        </button>
+
+        <div class="navbar-actions desktop-only">
           @if (currentUser) {
           <div class="user-menu">
             <button class="user-button" (click)="toggleUserMenu(); $event.stopPropagation()">
@@ -97,6 +119,75 @@ import { User, UserRole } from '../../../core/models/user.model';
           }
         </div>
       </div>
+
+      <!-- Mobile Menu Dropdown -->
+      @if (isMobileMenuOpen) {
+      <div class="mobile-menu">
+        <a
+          routerLink="/home"
+          routerLinkActive="active"
+          class="mobile-nav-link"
+          (click)="closeMobileMenu()"
+          >Home</a
+        >
+        <a
+          routerLink="/events"
+          routerLinkActive="active"
+          class="mobile-nav-link"
+          (click)="closeMobileMenu()"
+          >Events</a
+        >
+
+        @if (currentUser) {
+        <div class="mobile-divider"></div>
+        <div class="mobile-user-info">
+          <div class="user-avatar small">
+            <span>{{ getUserInitials() }}</span>
+          </div>
+          <div class="user-details">
+            <span class="name">{{ currentUser.fullName }}</span>
+            <span class="email">{{ currentUser.email }}</span>
+          </div>
+        </div>
+
+        @if (currentUser.role === UserRole.ADMIN) {
+        <a
+          routerLink="/admin/dashboard"
+          routerLinkActive="active"
+          class="mobile-nav-link"
+          (click)="closeMobileMenu()"
+          >Admin Dashboard</a
+        >
+        } @if (currentUser.role === UserRole.ORGANIZER) {
+        <a
+          routerLink="/organizer/dashboard"
+          routerLinkActive="active"
+          class="mobile-nav-link"
+          (click)="closeMobileMenu()"
+          >Organizer Dashboard</a
+        >
+        } @if (currentUser.role === UserRole.ATTENDEE) {
+        <a
+          routerLink="/my-tickets"
+          routerLinkActive="active"
+          class="mobile-nav-link"
+          (click)="closeMobileMenu()"
+          >My Tickets</a
+        >
+        }
+
+        <a routerLink="/change-password" class="mobile-nav-link" (click)="closeMobileMenu()"
+          >Change Password</a
+        >
+        <button (click)="logout()" class="mobile-nav-link logout">Sign Out</button>
+        } @else {
+        <div class="mobile-divider"></div>
+        <a routerLink="/login" class="mobile-nav-link primary" (click)="closeMobileMenu()"
+          >Sign In</a
+        >
+        }
+      </div>
+      }
     </nav>
   `,
   styles: [
@@ -315,17 +406,140 @@ import { User, UserRole } from '../../../core/models/user.model';
         color: var(--error-600);
       }
 
+      /* Mobile Menu Styles */
+      .mobile-menu-toggle {
+        display: none;
+        background: transparent;
+        border: none;
+        color: var(--primary-700);
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: var(--radius-md);
+      }
+
+      .mobile-menu-toggle:hover {
+        background: var(--primary-100);
+        color: var(--accent-600);
+      }
+
+      .mobile-menu {
+        position: fixed;
+        top: 4rem; /* Height of navbar */
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--neutral-white);
+        z-index: 999;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        border-top: 1px solid var(--primary-200);
+        animation: slideDown 0.3s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .mobile-nav-link {
+        padding: 1rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--primary-700);
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        transition: all var(--transition-fast);
+        display: block;
+      }
+
+      .mobile-nav-link:hover,
+      .mobile-nav-link.active {
+        background: var(--primary-100);
+        color: var(--accent-600);
+      }
+
+      .mobile-divider {
+        height: 1px;
+        background: var(--primary-200);
+        margin: 0.5rem 0;
+      }
+
+      .mobile-user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--primary-50);
+        border-radius: var(--radius-lg);
+        margin-bottom: 0.5rem;
+      }
+
+      .mobile-user-info .user-avatar.small {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 0.875rem;
+      }
+
+      .user-details {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .user-details .name {
+        font-weight: 600;
+        color: var(--primary-900);
+      }
+
+      .user-details .email {
+        font-size: 0.75rem;
+        color: var(--primary-600);
+      }
+
+      .mobile-nav-link.logout {
+        color: var(--error-600);
+        background: transparent;
+        border: none;
+        text-align: left;
+        width: 100%;
+        cursor: pointer;
+      }
+
+      .mobile-nav-link.logout:hover {
+        background: var(--error-50);
+      }
+
+      .mobile-nav-link.primary {
+        background: var(--accent-600);
+        color: white;
+        text-align: center;
+        margin-top: 1rem;
+      }
+
+      .mobile-nav-link.primary:hover {
+        background: var(--accent-700);
+      }
+
       @media (max-width: 768px) {
         .navbar-container {
           padding: 0 1rem;
         }
 
-        .navbar-menu {
-          display: none;
+        .desktop-only {
+          display: none !important;
         }
 
-        .user-info {
-          display: none;
+        .mobile-menu-toggle {
+          display: block;
         }
       }
     `,
@@ -334,6 +548,7 @@ import { User, UserRole } from '../../../core/models/user.model';
 export class NavbarComponent implements OnInit {
   currentUser: User | null = null;
   showUserMenu = false;
+  isMobileMenuOpen = false;
   UserRole = UserRole;
 
   constructor(private authService: AuthService, private router: Router) {}
@@ -353,15 +568,25 @@ export class NavbarComponent implements OnInit {
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     const userMenu = target.closest('.user-menu');
+    const mobileMenu = target.closest('.mobile-menu');
+    const mobileToggle = target.closest('.mobile-menu-toggle');
 
     if (!userMenu && this.showUserMenu) {
       this.showUserMenu = false;
+    }
+
+    if (!mobileMenu && !mobileToggle && this.isMobileMenuOpen) {
+      this.isMobileMenuOpen = false;
     }
   }
 
   getUserInitials(): string {
     if (!this.currentUser) return '';
     const names = this.currentUser.fullName.split(' ');
+    // Handle single name case
+    if (names.length === 1) {
+      return names[0].substring(0, 2).toUpperCase();
+    }
     return names
       .map((n) => n[0])
       .join('')
@@ -386,8 +611,21 @@ export class NavbarComponent implements OnInit {
     this.showUserMenu = false;
   }
 
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    // Close user menu if open when toggling mobile menu
+    if (this.isMobileMenuOpen) {
+      this.showUserMenu = false;
+    }
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
+  }
+
   logout(): void {
     this.authService.logout();
     this.showUserMenu = false;
+    this.isMobileMenuOpen = false;
   }
 }

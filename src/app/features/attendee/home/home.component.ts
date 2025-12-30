@@ -471,161 +471,24 @@ import { Event } from '../../../core/models/event.model';
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: 2rem;
+        justify-content: center; /* Center cards if they don't fill the row */
       }
 
-      .event-card {
-        background: var(--neutral-white);
-        border-radius: var(--radius-xl);
-        overflow: hidden;
-        box-shadow: var(--shadow-md);
-        transition: all var(--transition-base);
-      }
-
-      .event-card:hover {
-        box-shadow: var(--shadow-xl);
-        transform: translateY(-4px);
-      }
-
-      .event-image {
-        height: 200px;
-        background-size: cover;
-        background-position: center;
-        position: relative;
-      }
-
-      .event-placeholder {
-        background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-600) 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .event-placeholder svg {
-        width: 4rem;
-        height: 4rem;
-        color: var(--neutral-white);
-      }
-
-      .event-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
-      }
-
-      .event-content {
-        padding: 1.5rem;
-      }
-
-      .event-meta {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
-        color: var(--primary-600);
-        margin-bottom: 0.75rem;
-      }
-
-      .event-date {
-        font-weight: 500;
-      }
-
-      .event-separator {
-        color: var(--primary-400);
-      }
-
-      .event-title {
-        color: var(--primary-900);
-        margin-bottom: 0.75rem;
-        font-size: 1.25rem;
-      }
-
-      .event-description {
-        color: var(--primary-700);
-        margin-bottom: 1.5rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        line-height: 1.6;
-      }
-
-      .event-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 1rem;
-        border-top: 1px solid var(--primary-200);
-      }
-
-      .event-organizer {
-        color: var(--primary-600);
-        font-size: 0.875rem;
-      }
-
-      .event-link {
-        display: flex;
-        align-items: center;
-        gap: 0.375rem;
-        color: var(--accent-600);
-        font-weight: 500;
-        font-size: 0.875rem;
-        text-decoration: none;
-        transition: color var(--transition-fast);
-      }
-
-      .event-link:hover {
-        color: var(--accent-700);
-      }
-
-      .icon-sm {
-        width: 1rem;
-        height: 1rem;
-      }
-
-      /* CTA Section */
-      .cta {
-        padding: 6rem 2rem;
-        background: linear-gradient(135deg, var(--accent-700) 0%, var(--accent-900) 100%);
-        color: var(--neutral-white);
-      }
-
-      .cta-content {
-        max-width: 700px;
-        margin: 0 auto;
-        text-align: center;
-      }
-
-      .cta-title {
-        margin-bottom: 1rem;
-        font-size: 2.5rem;
-      }
-
-      .cta-description {
-        font-size: 1.125rem;
-        opacity: 0.95;
-        margin-bottom: 2rem;
-        color: var(--accent-300);
-      }
-
-      /* Loading & Empty States */
-      .loading-state {
-        text-align: center;
-        padding: 4rem 2rem;
-      }
-
-      .loading-state p {
-        color: var(--primary-600);
-        margin-top: 1rem;
-      }
+      /* ... */
 
       @media (max-width: 968px) {
         .hero-container {
           grid-template-columns: 1fr;
           text-align: center;
+          gap: 2rem; /* Reduce gap on mobile */
         }
 
         .hero-title {
           font-size: 2.25rem;
+        }
+
+        .hero-actions {
+          justify-content: center; /* Center buttons on mobile */
         }
 
         .hero-visual {
@@ -634,8 +497,9 @@ import { Event } from '../../../core/models/event.model';
 
         .section-header-inline {
           flex-direction: column;
-          align-items: flex-start;
-          gap: 1rem;
+          align-items: center; /* Center header */
+          text-align: center;
+          gap: 1.5rem;
         }
       }
     `,

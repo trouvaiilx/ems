@@ -269,6 +269,26 @@ interface TicketTypeForm {
         .setup-grid {
           grid-template-columns: 1fr;
         }
+
+        .ticket-item {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 1rem;
+        }
+
+        .ticket-info {
+          text-align: center;
+        }
+
+        .allocation-controls {
+          justify-content: center;
+        }
+
+        .item-actions {
+          justify-content: center;
+          border-top: 1px solid var(--primary-100);
+          padding-top: 1rem;
+        }
       }
 
       .card {

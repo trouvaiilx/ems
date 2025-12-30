@@ -393,7 +393,7 @@ import { Event } from '../../../core/models/event.model';
 
       .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1.5rem;
         margin-bottom: 3rem;
       }
@@ -643,6 +643,33 @@ import { Event } from '../../../core/models/event.model';
       .event-actions .btn svg {
         width: 0.875rem;
         height: 0.875rem;
+      }
+
+      @media (max-width: 640px) {
+        .dashboard-header {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 1rem;
+        }
+
+        .dashboard-header .btn {
+          justify-content: center;
+        }
+
+        .event-card {
+          flex-direction: column;
+        }
+
+        .event-poster {
+          height: 160px;
+        }
+
+        .filter-tabs {
+          width: 100%;
+          overflow-x: auto;
+          white-space: nowrap;
+          padding-bottom: 0.5rem;
+        }
       }
 
       .loading-state {
