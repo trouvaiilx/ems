@@ -11,7 +11,7 @@ import { User, UserRole } from '../../../core/models/user.model';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <nav class="navbar">
+    <nav class="navbar" [class.menu-open]="isMobileMenuOpen">
       <div class="navbar-container">
         <div class="navbar-brand">
           <a routerLink="/" class="brand-link">
@@ -44,7 +44,12 @@ import { User, UserRole } from '../../../core/models/user.model';
         </div>
 
         <!-- Mobile Menu Toggle -->
-        <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" aria-label="Toggle menu">
+        <button
+          class="mobile-menu-toggle"
+          [class.active]="isMobileMenuOpen"
+          (click)="toggleMobileMenu()"
+          aria-label="Toggle menu"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
             @if (isMobileMenuOpen) {
             <path
@@ -200,6 +205,11 @@ import { User, UserRole } from '../../../core/models/user.model';
         z-index: 1000;
         backdrop-filter: blur(10px);
         background: rgba(255, 255, 255, 0.95);
+      }
+
+      .navbar.menu-open {
+        background: var(--neutral-white);
+        backdrop-filter: none;
       }
 
       .navbar-container {
@@ -420,6 +430,11 @@ import { User, UserRole } from '../../../core/models/user.model';
       }
 
       .mobile-menu-toggle:hover {
+        background: var(--primary-100);
+        color: var(--accent-600);
+      }
+
+      .mobile-menu-toggle.active {
         background: var(--primary-100);
         color: var(--accent-600);
       }
