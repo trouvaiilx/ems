@@ -553,8 +553,7 @@ import { Event } from '../../../core/models/event.model';
         border: 1px solid var(--primary-200);
         transition: all var(--transition-base);
         display: flex;
-        flex-direction: row-reverse; /* Details Left, Image Right */
-        align-items: stretch;
+        flex-direction: column;
       }
 
       .event-card:hover {
@@ -563,12 +562,10 @@ import { Event } from '../../../core/models/event.model';
       }
 
       .event-poster {
-        width: 200px; /* Fixed width */
-        height: auto; /* Stretch height */
+        height: 200px;
         background-size: cover;
         background-position: center;
         position: relative;
-        flex-shrink: 0;
       }
 
       .event-poster.placeholder {
@@ -579,8 +576,8 @@ import { Event } from '../../../core/models/event.model';
       }
 
       .event-poster.placeholder svg {
-        width: 3rem;
-        height: 3rem;
+        width: 4rem;
+        height: 4rem;
         color: var(--neutral-white);
         stroke-width: 2;
       }
@@ -984,15 +981,6 @@ import { Event } from '../../../core/models/event.model';
       }
 
       @media (max-width: 480px) {
-        .stat-card {
-          flex-direction: column;
-          text-align: center;
-        }
-
-        .stat-icon {
-          margin: 0 auto 1rem;
-        }
-
         .stat-value {
           font-size: 1.75rem;
         }
