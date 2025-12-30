@@ -1,6 +1,14 @@
 // src/app/features/attendee/booking/booking.component.ts
 
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef,
+  NgZone,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -312,23 +320,8 @@ interface SelectedTicket {
             </div>
           </div>
 
-          <div
-            class="viewport"
-            #viewport
-            (wheel)="onWheel($event)"
-            (mousedown)="onMouseDown($event)"
-            (mousemove)="onMouseMove($event)"
-            (mouseup)="onMouseUp()"
-            (mouseleave)="onMouseUp()"
-            (touchstart)="onTouchStart($event)"
-            (touchmove)="onTouchMove($event)"
-            (touchend)="onTouchEnd()"
-          >
-            <div
-              class="venue-map"
-              [style.transform]="transformStyle"
-              [style.transform-origin]="'center top'"
-            >
+          <div class="viewport" #viewport>
+            <div class="venue-map" #venueMap [style.transform-origin]="'center top'">
               <!-- STAGE -->
               <div class="stage">STAGE</div>
 
@@ -1045,6 +1038,11 @@ interface SelectedTicket {
         cursor: grabbing;
       }
 
+      .viewport {
+        touch-action: none;
+        user-select: none;
+      }
+
       .venue-map {
         width: 800px; /* Base width for desktop */
         max-width: 100%;
@@ -1214,8 +1212,9 @@ interface SelectedTicket {
 
         .viewport {
           padding: 2rem 1rem;
+          touch-action: none;
+          user-select: none;
         }
-
         .venue-map {
           width: 100%; /* Full width on mobile base */
           gap: 1.5rem;
@@ -1269,8 +1268,11 @@ interface SelectedTicket {
     `,
   ],
 })
-export class BookingComponent implements OnInit {
+export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   Math = Math;
+  @ViewChild('viewport') viewportRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('venueMap') venueMapRef!: ElementRef<HTMLDivElement>;
+
   event: Event | undefined;
   tickets: TicketType[] = [];
   selectedTickets: SelectedTicket[] = [];
@@ -1293,9 +1295,9 @@ export class BookingComponent implements OnInit {
   lastClientX = 0;
   lastClientY = 0;
 
-  get transformStyle(): string {
-    return `scale(${this.zoomLevel}) translate(${this.panX}px, ${this.panY}px)`;
-  }
+  // Event listeners
+  private globalMoveListener: any;
+  private globalUpListener: any;
 
   // Global Venue Config
   stallSeats: string[] = [];
@@ -1308,7 +1310,8 @@ export class BookingComponent implements OnInit {
     private eventService: EventService,
     private ticketService: TicketService,
     private bookingService: BookingService,
-    private authService: AuthService
+    private authService: AuthService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -1408,18 +1411,84 @@ export class BookingComponent implements OnInit {
     this.zoomLevel = 1;
     this.panX = 0;
     this.panY = 0;
+    // We need to wait for view initialization to attach listeners content-wise if elements are recreated
+    // Since showOverlay is *ngIf, we might need to rely on ngAfterViewChecked or similar,
+    // OR just use a setter/timeout. But simpler:
+    // With @if (showOverlay), the elements don't exist yet.
+    // We can use setTimeout to wait for render, then move listeners.
+    setTimeout(() => {
+      this.addEventListeners();
+      this.updateTransform();
+    });
   }
 
   closeOverlay(): void {
+    this.removeEventListeners();
     this.showOverlay = false;
   }
 
+  ngAfterViewInit(): void {}
+
+  ngOnDestroy(): void {
+    this.removeEventListeners();
+  }
+
+  addEventListeners(): void {
+    if (!this.viewportRef) return;
+
+    this.ngZone.runOutsideAngular(() => {
+      const el = this.viewportRef.nativeElement;
+
+      el.addEventListener('wheel', this.onWheel.bind(this), { passive: false });
+      el.addEventListener('mousedown', this.onMouseDown.bind(this), { passive: false });
+      el.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false }); // Using passive: false to be safe mixed with preventDefault
+
+      // window listeners for drag continue
+      window.addEventListener('mousemove', this.onMouseMoveBind);
+      window.addEventListener('mouseup', this.onMouseUpBind);
+      window.addEventListener('touchmove', this.onTouchMoveBind, { passive: false });
+      window.addEventListener('touchend', this.onTouchEndBind);
+    });
+  }
+
+  removeEventListeners(): void {
+    if (this.viewportRef && this.viewportRef.nativeElement) {
+      const el = this.viewportRef.nativeElement;
+      el.removeEventListener('wheel', this.onWheel.bind(this));
+      el.removeEventListener('mousedown', this.onMouseDown.bind(this));
+      el.removeEventListener('touchstart', this.onTouchStart.bind(this));
+    }
+
+    window.removeEventListener('mousemove', this.onMouseMoveBind);
+    window.removeEventListener('mouseup', this.onMouseUpBind);
+    window.removeEventListener('touchmove', this.onTouchMoveBind);
+    window.removeEventListener('touchend', this.onTouchEndBind);
+  }
+
+  // Bindings for window listeners to ensure stable reference for removal
+  private onMouseMoveBind = this.onMouseMove.bind(this);
+  private onMouseUpBind = this.onMouseUp.bind(this);
+  private onTouchMoveBind = this.onTouchMove.bind(this);
+  private onTouchEndBind = this.onTouchEnd.bind(this);
+
+  updateTransform(): void {
+    if (this.venueMapRef) {
+      this.venueMapRef.nativeElement.style.transform = `scale(${this.zoomLevel}) translate(${this.panX}px, ${this.panY}px)`;
+    }
+  }
+
   zoomIn(): void {
-    if (this.zoomLevel < 3) this.zoomLevel += 0.2;
+    if (this.zoomLevel < 3) {
+      this.zoomLevel += 0.2;
+      this.updateTransform();
+    }
   }
 
   zoomOut(): void {
-    if (this.zoomLevel > 0.6) this.zoomLevel -= 0.2;
+    if (this.zoomLevel > 0.6) {
+      this.zoomLevel -= 0.2;
+      this.updateTransform();
+    }
   }
 
   onWheel(event: WheelEvent): void {
@@ -1427,6 +1496,7 @@ export class BookingComponent implements OnInit {
     const zoomSensitivity = 0.001;
     const newZoom = this.zoomLevel - event.deltaY * zoomSensitivity;
     this.zoomLevel = Math.max(0.5, Math.min(newZoom, 3));
+    this.updateTransform();
   }
 
   onMouseDown(event: MouseEvent): void {
@@ -1447,6 +1517,7 @@ export class BookingComponent implements OnInit {
 
     this.lastClientX = event.clientX;
     this.lastClientY = event.clientY;
+    this.updateTransform();
   }
 
   onMouseUp(): void {
@@ -1463,7 +1534,7 @@ export class BookingComponent implements OnInit {
 
   onTouchMove(event: TouchEvent): void {
     if (!this.isDragging || event.touches.length !== 1) return;
-    event.preventDefault();
+    if (event.cancelable) event.preventDefault();
     const touch = event.touches[0];
     const deltaX = touch.clientX - this.lastClientX;
     const deltaY = touch.clientY - this.lastClientY;
@@ -1473,6 +1544,7 @@ export class BookingComponent implements OnInit {
 
     this.lastClientX = touch.clientX;
     this.lastClientY = touch.clientY;
+    this.updateTransform();
   }
 
   onTouchEnd(): void {
