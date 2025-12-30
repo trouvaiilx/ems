@@ -54,7 +54,7 @@ const createEvent = async (req, res) => {
   }
 
   if (req.file) {
-    req.body.posterUrl = `http://${req.headers.host}/uploads/${req.file.filename}`;
+    req.body.posterUrl = `/uploads/${req.file.filename}`;
   }
 
   const event = await Event.create({
@@ -92,7 +92,7 @@ const updateEvent = async (req, res) => {
   }
 
   if (req.file) {
-    req.body.posterUrl = `http://${req.headers.host}/uploads/${req.file.filename}`;
+    req.body.posterUrl = `/uploads/${req.file.filename}`;
   }
 
   const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, {
