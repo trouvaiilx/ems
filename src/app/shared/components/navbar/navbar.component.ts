@@ -578,6 +578,7 @@ export class NavbarComponent implements OnInit {
 
   ngOnDestroy(): void {
     document.removeEventListener('click', this.onDocumentClick.bind(this));
+    document.body.style.overflow = '';
   }
 
   onDocumentClick(event: MouseEvent): void {
@@ -591,7 +592,7 @@ export class NavbarComponent implements OnInit {
     }
 
     if (!mobileMenu && !mobileToggle && this.isMobileMenuOpen) {
-      this.isMobileMenuOpen = false;
+      this.closeMobileMenu();
     }
   }
 
@@ -631,16 +632,20 @@ export class NavbarComponent implements OnInit {
     // Close user menu if open when toggling mobile menu
     if (this.isMobileMenuOpen) {
       this.showUserMenu = false;
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
   }
 
   closeMobileMenu(): void {
     this.isMobileMenuOpen = false;
+    document.body.style.overflow = '';
   }
 
   logout(): void {
     this.authService.logout();
     this.showUserMenu = false;
-    this.isMobileMenuOpen = false;
+    this.closeMobileMenu();
   }
 }
