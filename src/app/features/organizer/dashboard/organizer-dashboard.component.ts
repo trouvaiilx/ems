@@ -347,6 +347,16 @@ import { Event } from '../../../core/models/event.model';
   `,
   styles: [
     `
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        background: var(--neutral-white);
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+      }
       .dashboard-page {
         min-height: 100vh;
         background: var(--primary-100);
@@ -543,7 +553,8 @@ import { Event } from '../../../core/models/event.model';
         border: 1px solid var(--primary-200);
         transition: all var(--transition-base);
         display: flex;
-        flex-direction: column;
+        flex-direction: row-reverse; /* Details Left, Image Right */
+        align-items: stretch;
       }
 
       .event-card:hover {
@@ -552,10 +563,12 @@ import { Event } from '../../../core/models/event.model';
       }
 
       .event-poster {
-        height: 200px;
+        width: 200px; /* Fixed width */
+        height: auto; /* Stretch height */
         background-size: cover;
         background-position: center;
         position: relative;
+        flex-shrink: 0;
       }
 
       .event-poster.placeholder {
@@ -566,8 +579,8 @@ import { Event } from '../../../core/models/event.model';
       }
 
       .event-poster.placeholder svg {
-        width: 4rem;
-        height: 4rem;
+        width: 3rem;
+        height: 3rem;
         color: var(--neutral-white);
         stroke-width: 2;
       }
@@ -577,6 +590,7 @@ import { Event } from '../../../core/models/event.model';
         display: flex;
         flex-direction: column;
         flex: 1;
+        min-width: 0; /* Prevent flex overflow */
       }
 
       .event-header {
@@ -657,15 +671,15 @@ import { Event } from '../../../core/models/event.model';
         }
 
         .event-card {
-          flex-direction: column;
-          align-items: stretch; /* Ensure items fill width */
+          flex-direction: row-reverse; /* Maintain layout on mobile */
+          min-height: auto;
         }
 
         .event-poster {
-          height: 180px; /* Slightly taller */
-          width: 100%; /* Full width */
-          border-radius: var(--radius-lg) var(--radius-lg) 0 0; /* Rounded top only */
-          margin-right: 0; /* Reset margin */
+          height: auto;
+          width: 120px; /* Smaller image width on mobile */
+          border-radius: 0;
+          margin-right: 0;
         }
 
         .event-poster img {
