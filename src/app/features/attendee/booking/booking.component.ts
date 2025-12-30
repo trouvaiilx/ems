@@ -404,6 +404,7 @@ interface SelectedTicket {
         min-height: 100vh;
         background: var(--primary-100);
         padding: 2rem 1rem 4rem;
+        overflow-x: hidden;
       }
 
       /* Centered Loading State */
@@ -570,6 +571,8 @@ interface SelectedTicket {
         border: 2px solid var(--primary-200);
         border-radius: var(--radius-lg);
         transition: all var(--transition-fast);
+        flex-wrap: wrap;
+        gap: 1rem;
       }
 
       .ticket-selector:hover {
@@ -1043,12 +1046,13 @@ interface SelectedTicket {
       }
 
       .venue-map {
-        width: 800px; /* Fixed base width */
+        width: 800px; /* Base width for desktop */
+        max-width: 100%;
         display: flex;
         flex-direction: column;
         gap: 3rem;
         align-items: center;
-        transition: transform 0.1s linear; /* Faster transition for drag */
+        transition: transform 0.1s linear;
       }
 
       .stage {
@@ -1173,26 +1177,84 @@ interface SelectedTicket {
         height: 1.5rem;
       }
       @media (max-width: 968px) {
-        .booking-layout {
+        .booking-page {
+          padding: 1rem 0.5rem 6rem; /* Reduced padding */
+        }
+
+        .booking-grid {
           grid-template-columns: 1fr;
           gap: 1.5rem;
         }
 
-        .booking-summary-sidebar {
-          position: static; /* Remove sticky on mobile */
-          margin-bottom: 1rem;
-          order: -1; /* Show summary at top for better context, or remove if user prefers bottom */
+        .sidebar {
+          order: 2;
         }
 
-        /* If user prefers summary at bottom, remove order: -1. 
-           But usually summary at bottom is better for "Checkout".
-           Let's try putting it at the bottom to avoid pushing content down too much. */
-        .booking-summary-sidebar {
-          order: 1;
+        /* Improved Ticket Selector for Mobile */
+        .ticket-selector {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
         }
 
-        .content-card {
+        .ticket-selector .quantity-selector {
+          align-self: flex-end;
+          width: 100%;
+          justify-content: flex-end;
+        }
+
+        /* Seat map mobile adjustments */
+        .seat-overlay-container {
+          width: 100%;
+          height: 100%;
+          border-radius: 0;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .viewport {
+          padding: 2rem 1rem;
+        }
+
+        .venue-map {
+          width: 100%; /* Full width on mobile base */
+          gap: 1.5rem;
+        }
+
+        .section-container {
           padding: 1rem;
+          width: 95% !important; /* Force width to fit container */
+        }
+
+        .stage {
+          width: 80%;
+          height: 60px;
+        }
+
+        .seats-grid {
+          gap: 0.25rem;
+        }
+
+        .stall-grid {
+          grid-template-columns: repeat(10, 1fr); /* Reduce columns for mobile */
+        }
+
+        /* Adjust seat button size for mobile touch targets */
+        .seat-btn {
+          width: 28px;
+          height: 28px;
+          font-size: 0.6rem;
+        }
+
+        .overlay-header {
+          position: sticky;
+          top: 0;
+          z-index: 10;
+          background: var(--neutral-white);
+        }
+
+        .viewport {
+          flex: 1;
         }
       }
 
