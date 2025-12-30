@@ -1172,6 +1172,38 @@ interface SelectedTicket {
         width: 1.5rem;
         height: 1.5rem;
       }
+      @media (max-width: 968px) {
+        .booking-layout {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+
+        .booking-summary-sidebar {
+          position: static; /* Remove sticky on mobile */
+          margin-bottom: 1rem;
+          order: -1; /* Show summary at top for better context, or remove if user prefers bottom */
+        }
+
+        /* If user prefers summary at bottom, remove order: -1. 
+           But usually summary at bottom is better for "Checkout".
+           Let's try putting it at the bottom to avoid pushing content down too much. */
+        .booking-summary-sidebar {
+          order: 1;
+        }
+
+        .content-card {
+          padding: 1rem;
+        }
+      }
+
+      /* Fix invisible breadcrumb/header issue by adding background */
+      .page-header {
+        background: var(--neutral-white);
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+      }
     `,
   ],
 })

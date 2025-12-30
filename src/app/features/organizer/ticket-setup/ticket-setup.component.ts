@@ -246,6 +246,10 @@ interface TicketTypeForm {
 
       .page-header {
         margin-bottom: 2rem;
+        background: var(--neutral-white);
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
       }
 
       .page-header h1 {

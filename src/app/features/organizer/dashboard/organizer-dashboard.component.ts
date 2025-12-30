@@ -658,10 +658,20 @@ import { Event } from '../../../core/models/event.model';
 
         .event-card {
           flex-direction: column;
+          align-items: stretch; /* Ensure items fill width */
         }
 
         .event-poster {
-          height: 160px;
+          height: 180px; /* Slightly taller */
+          width: 100%; /* Full width */
+          border-radius: var(--radius-lg) var(--radius-lg) 0 0; /* Rounded top only */
+          margin-right: 0; /* Reset margin */
+        }
+
+        .event-poster img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
         .filter-tabs {
@@ -669,6 +679,7 @@ import { Event } from '../../../core/models/event.model';
           overflow-x: auto;
           white-space: nowrap;
           padding-bottom: 0.5rem;
+          justify-content: flex-start; /* Align left for scroll */
         }
       }
 
@@ -949,10 +960,12 @@ import { Event } from '../../../core/models/event.model';
 
         .event-actions {
           flex-direction: column;
+          gap: 0.75rem;
         }
 
         .event-actions .btn {
           width: 100%;
+          justify-content: center;
         }
       }
 
