@@ -41,6 +41,7 @@ import { AuthService } from '../../../core/services/auth.service';
                   required
                   placeholder="Enter your full name"
                   class="form-input"
+                  autocomplete="name"
                 />
               </div>
             </div>
@@ -56,6 +57,7 @@ import { AuthService } from '../../../core/services/auth.service';
                   required
                   placeholder="Enter your email"
                   class="form-input"
+                  autocomplete="email"
                 />
               </div>
             </div>
@@ -71,6 +73,7 @@ import { AuthService } from '../../../core/services/auth.service';
                   required
                   placeholder="Choose a username"
                   class="form-input"
+                  autocomplete="username"
                 />
               </div>
             </div>
@@ -86,6 +89,7 @@ import { AuthService } from '../../../core/services/auth.service';
                   required
                   placeholder="Enter your phone number"
                   class="form-input"
+                  autocomplete="tel"
                 />
               </div>
             </div>
@@ -101,6 +105,7 @@ import { AuthService } from '../../../core/services/auth.service';
                   required
                   placeholder="Create a password"
                   class="form-input"
+                  autocomplete="new-password"
                 />
               </div>
             </div>

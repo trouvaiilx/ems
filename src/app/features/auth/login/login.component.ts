@@ -49,6 +49,7 @@ import { LoginCredentials, UserRole } from '../../../core/models/user.model';
                   required
                   placeholder="Enter your username"
                   class="form-input"
+                  autocomplete="username"
                 />
               </div>
             </div>
@@ -71,6 +72,7 @@ import { LoginCredentials, UserRole } from '../../../core/models/user.model';
                   required
                   placeholder="Enter your password"
                   class="form-input"
+                  autocomplete="current-password"
                 />
               </div>
             </div>
