@@ -667,23 +667,7 @@ import { Event } from '../../../core/models/event.model';
           justify-content: center;
         }
 
-        .event-card {
-          flex-direction: row-reverse; /* Maintain layout on mobile */
-          min-height: auto;
-        }
-
-        .event-poster {
-          height: auto;
-          width: 120px; /* Smaller image width on mobile */
-          border-radius: 0;
-          margin-right: 0;
-        }
-
-        .event-poster img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
+        /* Reverted event-card layout to vertical on mobile (inherits from base) */
 
         .filter-tabs {
           width: 100%;
