@@ -57,6 +57,7 @@ const sendEmail = async (options) => {
       subject: options.subject,
       text: options.message,
       html: options.html || options.message.replace(/\n/g, '<br>'),
+      attachments: options.attachments,
     };
 
     const info = await transporter.sendMail(message);
