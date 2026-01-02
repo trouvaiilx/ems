@@ -168,6 +168,10 @@ const processPayment = async (req, res) => {
 
   // Send Email via Firebase Trigger (moved from createBooking)
   const event = await Event.findById(booking.eventId);
+
+  // Generate QR Code Data URL
+  const qrCodeDataUrl = await QRCode.toDataURL(booking.qrCode || booking._id.toString());
+
   sendEmail({
     email: booking.attendeeEmail,
     subject: 'Booking Confirmation - ' + (event ? event.name : 'Event'),
@@ -180,12 +184,30 @@ const processPayment = async (req, res) => {
             Booking ID: ${booking._id}
             Total Amount: RM ${booking.finalAmount}
 
-            Please show the QR Code in your app at the entrance.
+            Please show the QR Code in your app or the attached QR code below at the entrance.
 
             Enjoy the event!
             
             EMS Team
           `,
+    html: `
+      <h2>Booking Confirmed!</h2>
+      <p>Dear ${booking.attendeeName},</p>
+      <p>Your booking for <strong>${
+        event ? event.name : 'the event'
+      }</strong> has been confirmed!</p>
+      <p>
+        <strong>Event Date:</strong> ${new Date(booking.eventDate).toLocaleDateString()}<br>
+        <strong>Booking ID:</strong> ${booking._id}<br>
+        <strong>Total Amount:</strong> RM ${booking.finalAmount}
+      </p>
+      <div style="text-align: center; margin: 20px 0;">
+        <img src="${qrCodeDataUrl}" alt="Ticket QR Code" style="width: 200px; height: 200px;" />
+        <p>Scan this code at the entrance</p>
+      </div>
+      <p>Enjoy the event!</p>
+      <p>EMS Team</p>
+    `,
   }).catch((error) => console.error('Booking email failed:', error));
 
   // Log
