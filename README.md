@@ -1,6 +1,6 @@
 # Event Management System (EMS)
 
-A comprehensive web-based event management system built with Angular for HELP Events auditorium.
+A comprehensive web-based event management system built with the MEAN stack (MongoDB, Express, Angular, Node.js).
 
 ## 🎯 Project Overview
 
@@ -9,21 +9,95 @@ This Event Management System allows:
 - **Event Organizers** to create events, set up tickets, and manage bookings
 - **Attendees** to browse events, book tickets, and receive digital QR codes
 
-## 🚀 Technologies Used
+---
 
-- **Framework**: Angular 20.3.0
-- **Language**: TypeScript 5.9.2
-- **Styling**: CSS3 with modern gradients and animations
-- **State Management**: RxJS Observables
-- **Routing**: Angular Router with lazy loading
-- **Authentication**: Role-based access control (RBAC)
+## 📝 Project Report: Technical Implementation & Manual
 
-### Key Libraries & Features:
-- Standalone Components (Angular 14+)
-- Reactive Forms with FormsModule
-- Route Guards for security
-- Service-based architecture
-- Responsive design (mobile-first)
+### 1. New Web Technologies & Justification
+
+The following technologies have been implemented to transform the static frontend prototype into a fully functional dynamic web application.
+
+#### **Backend Runtime & Framework**
+- **Node.js**: chosen for its non-blocking, event-driven architecture which handles concurrent requests efficiently. It allows the use of JavaScript on both the client and server, unifying the development stack.
+- **Express.js**: chosen as the web application framework for Node.js. It provides a robust set of features for web and mobile applications, including simplified routing and middleware integration, which accelerates API development.
+
+#### **Database & Modeling**
+- **MongoDB**: A NoSQL database selected for its flexibility and ability to store data in JSON-like documents, which maps directly to the data structures used in the frontend application.
+- **Mongoose**: An Object Data Modeling (ODM) library for MongoDB. It is used to enforce schemas (e.g., User, Event, Ticket schemas), perform data validation, and manage relationships between data entities.
+
+#### **Authentication & Security**
+- **JSON Web Tokens (JWT)**: Implemented for stateless authentication. It allows the server to verify user identity without storing session state, making the application scalable.
+- **Bcrypt.js**: Used for hashing passwords before storage. This ensures that sensitive user credentials are secure even if the database is compromised.
+- **Cors**: Middleware used to enable Cross-Origin Resource Sharing, allowing the Angular frontend (running on a different port) to securely communicate with the backend API.
+
+#### **Functionality & Features**
+- **Multer**: Middleware for handling `multipart/form-data`. It is used to upload and store event posters and user profile images efficiently.
+- **Nodemailer**: A module for Node.js applications to send emails. It is used to send booking confirmations and system notifications to users.
+- **Google APIs (OAuth2)**: Integrated to authenticate with Gmail servers securely, ensuring reliable email delivery without exposing raw passwords.
+- **PDFKit**: Used for server-side PDF generation. This allows the system to dynamically generate downloadable reports and tickets.
+- **QRCode**: A library used to generate QR codes for tickets, which can be scanned for event entry.
+
+### 2. Manual Guide: Configuration & Installation
+
+Follow these steps to set up and execute the application locally.
+
+#### **Prerequisites**
+1.  **Node.js**: Download and install from [nodejs.org](https://nodejs.org/) (v18+ recommended).
+2.  **MongoDB**: Install MongoDB Community Server locally or set up a cloud cluster via MongoDB Atlas.
+3.  **Angular CLI**: Install globally using the command:
+    ```bash
+    npm install -g @angular/cli
+    ```
+
+#### **Step 1: Backend Setup**
+
+1.  Navigate to the backend directory:
+    ```bash
+    cd backend
+    ```
+2.  Install required dependencies:
+    ```bash
+    npm install
+    ```
+3.  Create a `.env` file in the `backend/` root directory and configure the following variables:
+    ```env
+    PORT=5000
+    MONGO_URI=mongodb://localhost:27017/ems_db
+    JWT_SECRET=your_super_secret_key_here
+    NODE_ENV=development
+
+    # Email Configuration (Optional for email features)
+    GMAIL_USER=your_email@gmail.com
+    GMAIL_CLIENT_ID=your_oauth_client_id
+    GMAIL_CLIENT_SECRET=your_oauth_client_secret
+    GMAIL_REFRESH_TOKEN=your_oauth_refresh_token
+    ```
+4.  Start the backend server:
+    ```bash
+    npm run dev
+    ```
+    *The server should be running on `http://localhost:5000`*
+
+#### **Step 2: Frontend Setup**
+
+1.  Open a new terminal and navigate to the project root (if not already there):
+    ```bash
+    cd path/to/project-root
+    ```
+2.  Install frontend dependencies:
+    ```bash
+    npm install
+    ```
+3.  Start the Angular development server:
+    ```bash
+    ng serve
+    ```
+4.  Open your browser and navigate to:
+    ```
+    http://localhost:4200/
+    ```
+
+---
 
 ## 📋 Features Implementation
 
@@ -68,53 +142,6 @@ This Event Management System allows:
 - Revenue tracking
 - Export to PDF/CSV
 
-## 🏗️ Project Structure
-
-```
-src/
-├── app/
-│   ├── core/                    # Core functionality
-│   │   ├── models/              # Data models & interfaces
-│   │   ├── services/            # Business logic services
-│   │   └── guards/              # Route guards
-│   ├── features/                # Feature modules
-│   │   ├── auth/                # Authentication
-│   │   ├── admin/               # Admin features
-│   │   ├── organizer/           # Organizer features
-│   │   └── attendee/            # Attendee features
-│   ├── shared/                  # Shared components
-│   │   └── components/          # Reusable UI components
-│   ├── app.ts                   # Root component
-│   ├── app.routes.ts            # Application routes
-│   └── app.config.ts            # App configuration
-├── styles.css                   # Global styles
-└── index.html                   # HTML entry point
-```
-
-## 📦 Installation & Setup
-
-### Prerequisites
-- Node.js (v18 or higher)
-- npm (v9 or higher)
-- Angular CLI (`npm install -g @angular/cli`)
-
-### Step 1: Install Dependencies
-```bash
-npm install
-```
-
-### Step 2: Development Server
-```bash
-ng serve
-```
-Navigate to `http://localhost:4200/`
-
-### Step 3: Build for Production
-```bash
-ng build
-```
-Build artifacts will be stored in the `dist/` directory.
-
 ## 👥 Demo Credentials
 
 ### Admin
@@ -130,93 +157,6 @@ Build artifacts will be stored in the `dist/` directory.
 - Username: `attendee1`
 - Password: `password`
 
-## 🎨 Design Highlights
-
-### Color Palette
-- Primary: `#6366f1` (Indigo)
-- Secondary: `#8b5cf6` (Purple)
-- Success: `#10b981` (Green)
-- Error: `#ef4444` (Red)
-- Background: `#f9fafb` (Light Gray)
-
-### Typography
-- Font Family: Inter, system fonts
-- Headings: 600 weight
-- Body: 400 weight
-
-### Responsive Breakpoints
-- Mobile: < 768px
-- Tablet: 768px - 968px
-- Desktop: > 968px
-
-## 🔐 Security Features
-
-- Role-based access control (Admin, Organizer, Attendee)
-- Route guards preventing unauthorized access
-- Password validation
-- Input sanitization
-- First-login password change requirement
-
-## 📱 Responsive Design
-
-The application is fully responsive and optimized for:
-- Desktop computers
-- Tablets
-- Mobile phones
-
-## 🧪 Testing
-
-Run unit tests:
-```bash
-ng test
-```
-
-Run end-to-end tests:
-```bash
-ng e2e
-```
-
-## 📊 Performance Optimizations
-
-- Lazy loading of feature modules
-- Standalone components for better tree-shaking
-- OnPush change detection strategy
-- Optimized bundle sizes
-- Image optimization
-
-## 🚧 Future Enhancements
-
-1. **Backend Integration**
-   - REST API integration
-   - Database persistence
-   - Real-time updates with WebSockets
-
-2. **Advanced Features**
-   - Email/SMS notifications
-   - Payment gateway integration
-   - PDF ticket generation
-   - QR code scanning app
-
-3. **Analytics**
-   - Advanced reporting dashboard
-   - Data visualization with charts
-   - Export functionality
-
-4. **User Experience**
-   - Push notifications
-   - Progressive Web App (PWA)
-   - Multi-language support
-
-## 📝 Assignment Submission Checklist
-
-- ✅ Source code uploaded
-- ✅ Project report (see separate document)
-- ✅ Video demonstration
-- ✅ User manuals
-- ✅ Technologies justification
-- ✅ Installation guide
-- ✅ References in APA format
-
 ## 👨‍💻 Development Team
 
 [Your Name/Team Names]
@@ -226,19 +166,3 @@ HELP University
 ## 📄 License
 
 This project is developed for educational purposes as part of BIT306 coursework.
-
-## 🙏 Acknowledgments
-
-- Angular Team for the excellent framework
-- HELP Events for the case study
-- Course instructors for guidance
-
-## 📞 Support
-
-For questions or issues:
-- Email: [your.email@help.edu.my]
-- Course Portal: HLMS BIT306
-
----
-
-**Note**: This is a prototype/educational project. For production use, additional security measures, testing, and backend implementation would be required.
